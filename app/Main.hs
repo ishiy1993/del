@@ -3,4 +3,8 @@ module Main where
 import Lib
 
 main :: IO ()
-main = putStrLn "mk-sode1"
+main = do
+    meom <- parseEOMFromFile "euler1.txt"
+    case meom of
+         Nothing -> putStrLn "Error"
+         Just eom -> putStrLn $ formatEOM eom
