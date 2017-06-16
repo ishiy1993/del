@@ -1,5 +1,7 @@
 module Main where
 
+import Format
+import Parser
 import Lib
 
 main :: IO ()
@@ -9,4 +11,4 @@ main = do
     putStrLn $ maybe "Error" formatEOM meom
     putStrLn ""
     putStrLn "Output:"
-    putStrLn $ maybe "Error" formatEOM $ differentiatedByT <$> meom
+    putStrLn $ maybe "Error" formatEOM $ diffByT <$> meom
