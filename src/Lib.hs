@@ -30,7 +30,7 @@ diffByX = map (\(Equation l r) -> Equation (d X l) (simplify $ d X r))
 d :: Coord -> Exp -> Exp
 d i (Num _) = Num 0.0
 d i (Term n a d) | i `S.member` a = Term n a (MS.insert i d)
-                 | otherwise = Term n a d
+                 | otherwise = Num 0.0
 d i (Mul e1 e2) = Add (Mul (d i e1) e2) (Mul e1 (d i e2))
 d i (Div e1 e2) = Sub (Div (d i e1) e2) (Mul (Div e1 (Mul e2 e2)) (d i e2))
 d i (Add e1 e2) = Add (d i e1) (d i e2)
