@@ -5,6 +5,8 @@ import Lib
 main :: IO ()
 main = do
     meom <- parseEOMFromFile "euler1.txt"
-    case meom of
-         Nothing -> putStrLn "Error"
-         Just eom -> putStrLn $ formatEOM eom
+    putStrLn "Input EOM:"
+    putStrLn $ maybe "Error" formatEOM meom
+    putStrLn ""
+    putStrLn "Output:"
+    putStrLn $ maybe "Error" formatEOM $ differentiatedByT <$> meom
