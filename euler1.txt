@@ -1,0 +1,4 @@
+b[t,x]_t = ((b[t,x]*u[t,x]_x) - (b[t,x]_x*u[t,x]))
+u[t,x]_t = ((-1*(u[t,x]*u[t,x]_x)) - (b[t,x]*p[t,x]_x))
+p[t,x]_t = (((-1*gamma)*(p[t,x]*u[t,x]_x)) - (u[t,x]*p[t,x]_x))
+
