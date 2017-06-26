@@ -1,4 +1,4 @@
-module Lib where
+module Lib (diffByT, diffBy) where
 
 import qualified Data.Set as S
 import qualified Data.MultiSet as MS
@@ -24,8 +24,8 @@ diffByT eom = map (\(Equation l r) -> Equation (d T l) (simplify $ replace $ d T
 find :: Exp -> EOM -> Exp
 find e = rhs . head . filter (\eq -> lhs eq == e)
 
-diffByX :: EOM -> EOM
-diffByX = map (\(Equation l r) -> Equation (d X l) (simplify $ d X r))
+diffBy :: Coord -> EOM -> EOM
+diffBy i = map (\(Equation l r) -> Equation (d i l) (simplify $ d i r))
 
 d :: Coord -> Exp -> Exp
 d i (Num _) = Num 0.0

@@ -1,11 +1,26 @@
 module Encode where
 
-import Data.List (intercalate)
+import Data.Ord (comparing)
+import Data.List (intercalate, maximumBy)
 import qualified Data.Set as S
 import qualified Data.MultiSet as MS
 
 import Format
+import Lib
 import Syntax
+
+toCode :: EOM -> String
+toCode eom = unlines $
+    [ "dimension :: " ++ show dim
+    , "axes :: " ++ intercalate "," (map show axes)
+    , ""
+    , encode eom
+    , encode eomT
+    ] ++ concatMap (\i -> map (encode . diffBy i) [eom, eomT]) axes
+    where
+        dim = length axes
+        axes = S.toList $ S.delete T $ maximumBy (comparing S.size) $ map (dependOn . lhs) eom
+        eomT = diffByT eom
 
 encode :: EOM -> String
 encode eom = unlines $ [header]
