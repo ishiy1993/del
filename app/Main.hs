@@ -1,5 +1,7 @@
 module Main where
 
+import Control.Monad
+import System.Environment
 import System.Exit
 
 import Encode
@@ -9,9 +11,11 @@ import Lib
 
 main :: IO ()
 main = do
-    meom <- parseEOMFromFile "euler1.txt"
+    as <- getArgs
+    when (null as) $ die "Need a file name"
+    meom <- parseEOMFromFile $ head as
     case meom of
-         Nothing -> die "Error"
+         Nothing -> die "Unable to parse"
          Just eom -> do
              putStrLn $ encode eom
              putStrLn $ encode $ diffByT eom
