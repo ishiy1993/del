@@ -2,7 +2,10 @@
 EOMから袖1スキームを導出する
 
 ```
-$ stack exec mk-sode1
+$ stack exec -- mk-sode1 "euler1.txt"
+dimension :: 1
+axes :: x
+
 begin function (b_t,u_t,p_t) = d_t((b,u,p),(b_x,u_x,p_x))
 b_t = ((b * u_x) - (b_x * u))
 u_t = ((-1.0 * (u * u_x)) - (b * p_x))
@@ -38,4 +41,5 @@ b_ttx = (((((((b_x * u_x) + (b * u_xx)) - ((b_xx * u) + (b_x * u_x))) * u_x) + (
 u_ttx = ((-1.0 * (((((-1.0 * ((u_x * u_x) + (u * u_xx))) - ((b_x * p_x) + (b * p_xx))) * u_x) + (((-1.0 * (u * u_x)) - (b * p_x)) * u_xx)) + ((u_x * ((-1.0 * ((u_x * u_x) + (u * u_xx))) - ((b_x * p_x) + (b * p_xx)))) + (u * ((-1.0 * (((u_xx * u_x) + (u_x * u_xx)) + ((u_x * u_xx) + (u * u_xxx)))) - (((b_xx * p_x) + (b_x * p_xx)) + ((b_x * p_xx) + (b * p_xxx)))))))) - ((((((b_x * u_x) + (b * u_xx)) - ((b_xx * u) + (b_x * u_x))) * p_x) + (((b * u_x) - (b_x * u)) * p_xx)) + ((b_x * (((-1.0 * gamma) * ((p_x * u_x) + (p * u_xx))) - ((u_x * p_x) + (u * p_xx)))) + (b * (((-1.0 * gamma) * (((p_xx * u_x) + (p_x * u_xx)) + ((p_x * u_xx) + (p * u_xxx)))) - (((u_xx * p_x) + (u_x * p_xx)) + ((u_x * p_xx) + (u * p_xxx))))))))
 p_ttx = (((-1.0 * gamma) * ((((((-1.0 * gamma) * ((p_x * u_x) + (p * u_xx))) - ((u_x * p_x) + (u * p_xx))) * u_x) + ((((-1.0 * gamma) * (p * u_x)) - (u * p_x)) * u_xx)) + ((p_x * ((-1.0 * ((u_x * u_x) + (u * u_xx))) - ((b_x * p_x) + (b * p_xx)))) + (p * ((-1.0 * (((u_xx * u_x) + (u_x * u_xx)) + ((u_x * u_xx) + (u * u_xxx)))) - (((b_xx * p_x) + (b_x * p_xx)) + ((b_x * p_xx) + (b * p_xxx)))))))) - (((((-1.0 * ((u_x * u_x) + (u * u_xx))) - ((b_x * p_x) + (b * p_xx))) * p_x) + (((-1.0 * (u * u_x)) - (b * p_x)) * p_xx)) + ((u_x * (((-1.0 * gamma) * ((p_x * u_x) + (p * u_xx))) - ((u_x * p_x) + (u * p_xx)))) + (u * (((-1.0 * gamma) * (((p_xx * u_x) + (p_x * u_xx)) + ((p_x * u_xx) + (p * u_xxx)))) - (((u_xx * p_x) + (u_x * p_xx)) + ((u_x * p_xx) + (u * p_xxx))))))))
 end function
+
 ```
