@@ -12,6 +12,7 @@ diffByT eom = map (\(Equation l r) -> Equation (d T l) (simplify $ replace $ d T
         replace (Sub e1 e2) = Sub (replace e1) (replace e2)
         replace (Mul e1 e2) = Mul (replace e1) (replace e2)
         replace (Div e1 e2) = Add (replace e1) (replace e2)
+        replace (Neg e) = Neg (replace e)
         -- Assume the size of ds is 2 at most
         replace e@(Sym n a ds)
             | d0 == ds = find e eom
@@ -30,7 +31,8 @@ diffBy i = map (\(Equation l r) -> Equation (d i l) (simplify $ d i r))
 d :: Coord -> Exp -> Exp
 d i (Num _) = Num 0.0
 d i (Sym n a d) | i `S.member` a = Sym n a (MS.insert i d)
-                 | otherwise = Num 0.0
+                | otherwise = Num 0.0
+d i (Neg e) = Neg (d i e)
 d i (Mul e1 e2) = Add (Mul (d i e1) e2) (Mul e1 (d i e2))
 d i (Div e1 e2) = Sub (Div (d i e1) e2) (Mul (Div e1 (Mul e2 e2)) (d i e2))
 d i (Add e1 e2) = Add (d i e1) (d i e2)
@@ -55,6 +57,7 @@ simplifible (Add e1 e2) = simplifible e1 || simplifible e2
 simplifible (Sub (Num 0) e) = True
 simplifible (Sub e (Num 0)) = True
 simplifible (Sub e1 e2) = simplifible e1 || simplifible e2
+simplifible (Neg (Neg e)) = True
 simplifible e = False
 
 -- This is not enough
@@ -73,4 +76,5 @@ simplify' (Add e1 e2) = Add (simplify' e1) (simplify' e2)
 simplify' (Sub (Num 0) e) = Mul (Num (-1)) (simplify' e)
 simplify' (Sub e (Num 0)) = simplify' e
 simplify' (Sub e1 e2) = Sub (simplify' e1) (simplify' e2)
+simplify' (Neg (Neg e)) = simplify' e
 simplify' e = e

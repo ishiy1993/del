@@ -51,6 +51,7 @@ encodeEquation (Equation l r) = unwords [encodeExp l, "=", encodeExp r]
 encodeExp :: Exp -> String
 encodeExp (Num x) = show x
 encodeExp (Sym n _ ds) = n ++ formatDiff ds
+encodeExp (Neg e) = "-" ++ encodeExp e
 encodeExp (Mul e1 e2) = "(" ++ encodeExp e1 ++ " * " ++ encodeExp e2 ++")"
 encodeExp (Div e1 e2) = "(" ++ encodeExp e1 ++ " / " ++ encodeExp e2 ++")"
 encodeExp (Add e1 e2) = "(" ++ encodeExp e1 ++ " + " ++ encodeExp e2 ++")"
