@@ -58,6 +58,7 @@ simplifible (Sub (Num 0) e) = True
 simplifible (Sub e (Num 0)) = True
 simplifible (Sub e1 e2) = simplifible e1 || simplifible e2
 simplifible (Neg (Neg e)) = True
+simplifible (Neg e) = simplifible e
 simplifible e = False
 
 -- This is not enough
@@ -77,4 +78,5 @@ simplify' (Sub (Num 0) e) = Mul (Num (-1)) (simplify' e)
 simplify' (Sub e (Num 0)) = simplify' e
 simplify' (Sub e1 e2) = Sub (simplify' e1) (simplify' e2)
 simplify' (Neg (Neg e)) = simplify' e
+simplify' (Neg e) = simplify' e
 simplify' e = e

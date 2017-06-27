@@ -1,8 +1,10 @@
 module Parser where
 
 import Control.Applicative
+import Control.Exception
 import qualified Data.Set as S
 import qualified Data.MultiSet as MS
+import Data.Typeable
 import Text.Trifecta
 import Text.Parser.Expression
 import Text.Parser.Token.Style
@@ -35,7 +37,7 @@ term = factor `chainl1` mulop
     where mulop = infixOp "*" Mul <|> infixOp "/" Div
 
 infixOp :: String -> (a -> a -> a) -> Parser (a -> a -> a)
-infixOp op f = f <$ (spaces >> symbol op >> spaces)
+infixOp op f = f <$ symbol op
 
 factor :: Parser Exp
 factor = parens expr
@@ -65,5 +67,18 @@ coord = (char 't' *> pure T)
     <|> (char 'y' *> pure Y)
     <|> (char 'z' *> pure Z)
 
-parseEOMFromFile :: String -> IO (Maybe EOM)
-parseEOMFromFile = parseFromFile parseEOM
+getEOMFromFile :: String -> IO EOM
+getEOMFromFile fn = do
+    str <- readFile fn
+    let str' = filter (/=' ') str
+    case parseString parseEOM mempty str' of
+         Success eom -> return eom
+         Failure err -> throwIO $ ParseException err
+
+data ParseException = ParseException ErrInfo
+    deriving Typeable
+
+instance Show ParseException where
+    show (ParseException e) = show e
+
+instance Exception ParseException

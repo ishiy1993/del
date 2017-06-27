@@ -12,5 +12,5 @@ main :: IO ()
 main = do
     as <- getArgs
     when (null as) $ die "Need a file name"
-    meom <- parseEOMFromFile $ head as
-    maybe (die "Unable to parse") (putStr . toCode) meom
+    eom <- getEOMFromFile (head as)
+    putStr $ toCode eom
