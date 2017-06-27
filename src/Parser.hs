@@ -15,7 +15,7 @@ parseEOM = many parseEquation
 parseEquation :: Parser Equation
 parseEquation = do
     spaces
-    l <- parseExp
+    l <- parseSym
     spaces
     char '='
     spaces
@@ -24,17 +24,27 @@ parseEquation = do
     return $ Equation l r
 
 parseExp :: Parser Exp
-parseExp = parens expr
-       <|> parseSym
-       <|> parseNum
+parseExp = expr
 
 expr :: Parser Exp
-expr = buildExpressionParser table parseExp
-    where
-        table = [[binary "*" Mul AssocLeft, binary "/" Div AssocLeft]
-                ,[binary "+" Add AssocLeft, binary "-" Sub AssocLeft]
-                ]
-        binary op f = Infix (f <$ reserve emptyOps op)
+expr = term `chainl1` addop
+    where addop = infixOp "+" Add <|> infixOp "-" Sub
+
+term :: Parser Exp
+term = factor `chainl1` mulop
+    where mulop = infixOp "*" Mul <|> infixOp "/" Div
+
+infixOp :: String -> (a -> a -> a) -> Parser (a -> a -> a)
+infixOp op f = f <$ (spaces >> symbol op >> spaces)
+
+factor :: Parser Exp
+factor = parens expr
+     <|> neg
+     <|> parseSym
+     <|> parseNum
+
+neg :: Parser Exp
+neg = symbol "-" >> Neg <$> factor
 
 parseNum :: Parser Exp
 parseNum = Num . either fromIntegral id <$> integerOrDouble
