@@ -35,7 +35,7 @@ encode eom = unlines $ [header]
         footer = "end function"
 
 leftHandSide :: [Exp] -> String
-leftHandSide = paren . map (\(Term n _ ds) -> n ++ formatDiff ds)
+leftHandSide = paren . map (\(Sym n _ ds) -> n ++ formatDiff ds)
 
 rightHandSide :: [Exp] -> String
 rightHandSide vs = funName ++ paren args
@@ -50,14 +50,14 @@ encodeEquation (Equation l r) = unwords [encodeExp l, "=", encodeExp r]
 
 encodeExp :: Exp -> String
 encodeExp (Num x) = show x
-encodeExp (Term n _ ds) = n ++ formatDiff ds
+encodeExp (Sym n _ ds) = n ++ formatDiff ds
 encodeExp (Mul e1 e2) = "(" ++ encodeExp e1 ++ " * " ++ encodeExp e2 ++")"
 encodeExp (Div e1 e2) = "(" ++ encodeExp e1 ++ " / " ++ encodeExp e2 ++")"
 encodeExp (Add e1 e2) = "(" ++ encodeExp e1 ++ " + " ++ encodeExp e2 ++")"
 encodeExp (Sub e1 e2) = "(" ++ encodeExp e1 ++ " - " ++ encodeExp e2 ++")"
 
 mkDiff :: Exp -> [String]
-mkDiff (Term n as ds)
+mkDiff (Sym n as ds)
     | ord == 2 = d2
     | ord == 3 = d2 ++ d3
     | otherwise = []

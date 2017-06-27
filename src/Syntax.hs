@@ -7,11 +7,13 @@ type EOM = [Equation]
 data Equation = Equation { lhs :: Exp
                          , rhs :: Exp
                          } deriving Show
+
 data Exp = Num Double
-         | Term { name :: String
-                , dependOn :: Arg
-                , differentiatedBy :: Coords
-                }
+         | Sym { name :: String
+               , dependOn :: Arg
+               , differentiatedBy :: Coords
+               }
+         | Neg Exp
          | Add Exp Exp
          | Mul Exp Exp
          | Sub Exp Exp

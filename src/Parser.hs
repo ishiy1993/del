@@ -25,7 +25,7 @@ parseEquation = do
 
 parseExp :: Parser Exp
 parseExp = parens expr
-       <|> parseTerm
+       <|> parseSym
        <|> parseNum
 
 expr :: Parser Exp
@@ -39,12 +39,12 @@ expr = buildExpressionParser table parseExp
 parseNum :: Parser Exp
 parseNum = Num . either fromIntegral id <$> integerOrDouble
 
-parseTerm :: Parser Exp
-parseTerm = do
+parseSym :: Parser Exp
+parseSym = do
     n <- some letter
     as <- option S.empty $ brackets args
     ds <- option MS.empty $ MS.fromList <$> (char '_' *> some coord)
-    return $ Term n as ds
+    return $ Sym n as ds
 
 args :: Parser Arg
 args = S.fromList <$> some (coord <* optional comma)

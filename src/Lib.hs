@@ -13,10 +13,10 @@ diffByT eom = map (\(Equation l r) -> Equation (d T l) (simplify $ replace $ d T
         replace (Mul e1 e2) = Mul (replace e1) (replace e2)
         replace (Div e1 e2) = Add (replace e1) (replace e2)
         -- Assume the size of ds is 2 at most
-        replace e@(Term n a ds)
+        replace e@(Sym n a ds)
             | d0 == ds = find e eom
             | T `MS.member` ds = let ds' = head $ MS.toList (ds MS.\\ d0)
-                                 in  d ds' $ find (Term n a d0) eom
+                                 in  d ds' $ find (Sym n a d0) eom
             | otherwise = e
             where d0 = MS.singleton T
         replace e = e
@@ -29,7 +29,7 @@ diffBy i = map (\(Equation l r) -> Equation (d i l) (simplify $ d i r))
 
 d :: Coord -> Exp -> Exp
 d i (Num _) = Num 0.0
-d i (Term n a d) | i `S.member` a = Term n a (MS.insert i d)
+d i (Sym n a d) | i `S.member` a = Sym n a (MS.insert i d)
                  | otherwise = Num 0.0
 d i (Mul e1 e2) = Add (Mul (d i e1) e2) (Mul e1 (d i e2))
 d i (Div e1 e2) = Sub (Div (d i e1) e2) (Mul (Div e1 (Mul e2 e2)) (d i e2))

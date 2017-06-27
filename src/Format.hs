@@ -14,7 +14,7 @@ formatEquation (Equation l r) = unwords [formatExp l, "=", formatExp r]
 
 formatExp :: Exp -> String
 formatExp (Num x) = show x
-formatExp (Term n a ds) = n ++ formatArg a ++ formatDiff ds
+formatExp (Sym n a ds) = n ++ formatArg a ++ formatDiff ds
 formatExp (Mul e1 e2) = "(" ++ formatExp e1 ++ " * " ++ formatExp e2 ++")"
 formatExp (Div e1 e2) = "(" ++ formatExp e1 ++ " / " ++ formatExp e2 ++")"
 formatExp (Add e1 e2) = "(" ++ formatExp e1 ++ " + " ++ formatExp e2 ++")"
