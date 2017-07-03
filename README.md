@@ -6,19 +6,22 @@ $ stack exec -- mk-sode1 "euler1.txt"
 dimension :: 1
 axes :: x
 
+d_xx = fun(a,a_x) 2*(a[i+1] + a[i-1] - 2a[i] - h*(a_x[i+1] - a_x[i-1])/4)/h/h
+d_xxx = fun(a,a_x) (a_x[i+1] + a_x[i-1] - 2a_x[i])/h/h
+
 begin function (b_t,u_t,p_t) = d_t((b,u,p),(b_x,u_x,p_x))
 b_t = ((b * u_x) - (b_x * u))
-u_t = ((-1.0 * (u * u_x)) - (b * p_x))
-p_t = (((-1.0 * gamma) * (p * u_x)) - (u * p_x))
+u_t = -((u * u_x) + (b * p_x))
+p_t = -(((gm * p) * u_x) + (u * p_x))
 end function
 
 begin function (b_tt,u_tt,p_tt) = d_tt((b,u,p),(b_x,u_x,p_x))
 b_xx = d_xx(b,b_x)
 u_xx = d_xx(u,u_x)
 p_xx = d_xx(p,p_x)
-b_tt = (((((b * u_x) - (b_x * u)) * u_x) + (b * ((-1.0 * ((u_x * u_x) + (u * u_xx))) - ((b_x * p_x) + (b * p_xx))))) - (((((b_x * u_x) + (b * u_xx)) - ((b_xx * u) + (b_x * u_x))) * u) + (b_x * ((-1.0 * (u * u_x)) - (b * p_x)))))
-u_tt = ((-1.0 * ((((-1.0 * (u * u_x)) - (b * p_x)) * u_x) + (u * ((-1.0 * ((u_x * u_x) + (u * u_xx))) - ((b_x * p_x) + (b * p_xx)))))) - ((((b * u_x) - (b_x * u)) * p_x) + (b * (((-1.0 * gamma) * ((p_x * u_x) + (p * u_xx))) - ((u_x * p_x) + (u * p_xx))))))
-p_tt = (((-1.0 * gamma) * (((((-1.0 * gamma) * (p * u_x)) - (u * p_x)) * u_x) + (p * ((-1.0 * ((u_x * u_x) + (u * u_xx))) - ((b_x * p_x) + (b * p_xx)))))) - ((((-1.0 * (u * u_x)) - (b * p_x)) * p_x) + (u * (((-1.0 * gamma) * ((p_x * u_x) + (p * u_xx))) - ((u_x * p_x) + (u * p_xx))))))
+b_tt = (((((b * u_x) - (b_x * u)) * u_x) + (b * -(((u_x * u_x) + (u * u_xx)) + ((b_x * p_x) + (b * p_xx))))) - (((((b_x * u_x) + (b * u_xx)) - ((b_xx * u) + (b_x * u_x))) * u) + (b_x * -((u * u_x) + (b * p_x)))))
+u_tt = (((((u * u_x) + (b * p_x)) * u_x) + (u * (((u_x * u_x) + (u * u_xx)) + ((b_x * p_x) + (b * p_xx))))) + ((((b * u_x) - (b_x * u)) * p_x) + (b * ((((gm * p_x) * u_x) + ((gm * p) * u_xx)) + ((u_x * p_x) + (u * p_xx))))))
+p_tt = ((((gm * (((gm * p) * u_x) + (u * p_x))) * u_x) + ((gm * p) * (((u_x * u_x) + (u * u_xx)) + ((b_x * p_x) + (b * p_xx))))) + ((((u * u_x) + (b * p_x)) * p_x) + (u * ((((gm * p_x) * u_x) + ((gm * p) * u_xx)) + ((u_x * p_x) + (u * p_xx))))))
 end function
 
 begin function (b_tx,u_tx,p_tx) = d_tx((b,u,p),(b_x,u_x,p_x))
@@ -26,8 +29,8 @@ b_xx = d_xx(b,b_x)
 u_xx = d_xx(u,u_x)
 p_xx = d_xx(p,p_x)
 b_tx = (((b_x * u_x) + (b * u_xx)) - ((b_xx * u) + (b_x * u_x)))
-u_tx = ((-1.0 * ((u_x * u_x) + (u * u_xx))) - ((b_x * p_x) + (b * p_xx)))
-p_tx = (((-1.0 * gamma) * ((p_x * u_x) + (p * u_xx))) - ((u_x * p_x) + (u * p_xx)))
+u_tx = -(((u_x * u_x) + (u * u_xx)) + ((b_x * p_x) + (b * p_xx)))
+p_tx = ((((gm * p_x) * u_x) + ((gm * p) * u_xx)) + ((u_x * p_x) + (u * p_xx)))
 end function
 
 begin function (b_ttx,u_ttx,p_ttx) = d_ttx((b,u,p),(b_x,u_x,p_x))
@@ -37,9 +40,8 @@ u_xx = d_xx(u,u_x)
 u_xxx = d_xxx(u,u_x)
 p_xx = d_xx(p,p_x)
 p_xxx = d_xxx(p,p_x)
-b_ttx = (((((((b_x * u_x) + (b * u_xx)) - ((b_xx * u) + (b_x * u_x))) * u_x) + (((b * u_x) - (b_x * u)) * u_xx)) + ((b_x * ((-1.0 * ((u_x * u_x) + (u * u_xx))) - ((b_x * p_x) + (b * p_xx)))) + (b * ((-1.0 * (((u_xx * u_x) + (u_x * u_xx)) + ((u_x * u_xx) + (u * u_xxx)))) - (((b_xx * p_x) + (b_x * p_xx)) + ((b_x * p_xx) + (b * p_xxx))))))) - (((((((b_xx * u_x) + (b_x * u_xx)) + ((b_x * u_xx) + (b * u_xxx))) - (((b_xxx * u) + (b_xx * u_x)) + ((b_xx * u_x) + (b_x * u_xx)))) * u) + ((((b_x * u_x) + (b * u_xx)) - ((b_xx * u) + (b_x * u_x))) * u_x)) + ((b_xx * ((-1.0 * (u * u_x)) - (b * p_x))) + (b_x * ((-1.0 * ((u_x * u_x) + (u * u_xx))) - ((b_x * p_x) + (b * p_xx)))))))
-u_ttx = ((-1.0 * (((((-1.0 * ((u_x * u_x) + (u * u_xx))) - ((b_x * p_x) + (b * p_xx))) * u_x) + (((-1.0 * (u * u_x)) - (b * p_x)) * u_xx)) + ((u_x * ((-1.0 * ((u_x * u_x) + (u * u_xx))) - ((b_x * p_x) + (b * p_xx)))) + (u * ((-1.0 * (((u_xx * u_x) + (u_x * u_xx)) + ((u_x * u_xx) + (u * u_xxx)))) - (((b_xx * p_x) + (b_x * p_xx)) + ((b_x * p_xx) + (b * p_xxx)))))))) - ((((((b_x * u_x) + (b * u_xx)) - ((b_xx * u) + (b_x * u_x))) * p_x) + (((b * u_x) - (b_x * u)) * p_xx)) + ((b_x * (((-1.0 * gamma) * ((p_x * u_x) + (p * u_xx))) - ((u_x * p_x) + (u * p_xx)))) + (b * (((-1.0 * gamma) * (((p_xx * u_x) + (p_x * u_xx)) + ((p_x * u_xx) + (p * u_xxx)))) - (((u_xx * p_x) + (u_x * p_xx)) + ((u_x * p_xx) + (u * p_xxx))))))))
-p_ttx = (((-1.0 * gamma) * ((((((-1.0 * gamma) * ((p_x * u_x) + (p * u_xx))) - ((u_x * p_x) + (u * p_xx))) * u_x) + ((((-1.0 * gamma) * (p * u_x)) - (u * p_x)) * u_xx)) + ((p_x * ((-1.0 * ((u_x * u_x) + (u * u_xx))) - ((b_x * p_x) + (b * p_xx)))) + (p * ((-1.0 * (((u_xx * u_x) + (u_x * u_xx)) + ((u_x * u_xx) + (u * u_xxx)))) - (((b_xx * p_x) + (b_x * p_xx)) + ((b_x * p_xx) + (b * p_xxx)))))))) - (((((-1.0 * ((u_x * u_x) + (u * u_xx))) - ((b_x * p_x) + (b * p_xx))) * p_x) + (((-1.0 * (u * u_x)) - (b * p_x)) * p_xx)) + ((u_x * (((-1.0 * gamma) * ((p_x * u_x) + (p * u_xx))) - ((u_x * p_x) + (u * p_xx)))) + (u * (((-1.0 * gamma) * (((p_xx * u_x) + (p_x * u_xx)) + ((p_x * u_xx) + (p * u_xxx)))) - (((u_xx * p_x) + (u_x * p_xx)) + ((u_x * p_xx) + (u * p_xxx))))))))
+b_ttx = (((((((b_x * u_x) + (b * u_xx)) - ((b_xx * u) + (b_x * u_x))) * u_x) + (((b * u_x) - (b_x * u)) * u_xx)) + ((b_x * -(((u_x * u_x) + (u * u_xx)) + ((b_x * p_x) + (b * p_xx)))) + (b * -((((u_xx * u_x) + (u_x * u_xx)) + ((u_x * u_xx) + (u * u_xxx))) + (((b_xx * p_x) + (b_x * p_xx)) + ((b_x * p_xx) + (b * p_xxx))))))) - (((((((b_xx * u_x) + (b_x * u_xx)) + ((b_x * u_xx) + (b * u_xxx))) - (((b_xxx * u) + (b_xx * u_x)) + ((b_xx * u_x) + (b_x * u_xx)))) * u) + ((((b_x * u_x) + (b * u_xx)) - ((b_xx * u) + (b_x * u_x))) * u_x)) + ((b_xx * -((u * u_x) + (b * p_x))) + (b_x * -(((u_x * u_x) + (u * u_xx)) + ((b_x * p_x) + (b * p_xx)))))))
+u_ttx = (((((((u_x * u_x) + (u * u_xx)) + ((b_x * p_x) + (b * p_xx))) * u_x) + (((u * u_x) + (b * p_x)) * u_xx)) + ((u_x * (((u_x * u_x) + (u * u_xx)) + ((b_x * p_x) + (b * p_xx)))) + (u * ((((u_xx * u_x) + (u_x * u_xx)) + ((u_x * u_xx) + (u * u_xxx))) + (((b_xx * p_x) + (b_x * p_xx)) + ((b_x * p_xx) + (b * p_xxx))))))) + ((((((b_x * u_x) + (b * u_xx)) - ((b_xx * u) + (b_x * u_x))) * p_x) + (((b * u_x) - (b_x * u)) * p_xx)) + ((b_x * ((((gm * p_x) * u_x) + ((gm * p) * u_xx)) + ((u_x * p_x) + (u * p_xx)))) + (b * (((((gm * p_xx) * u_x) + ((gm * p_x) * u_xx)) + (((gm * p_x) * u_xx) + ((gm * p) * u_xxx))) + (((u_xx * p_x) + (u_x * p_xx)) + ((u_x * p_xx) + (u * p_xxx))))))))
+p_ttx = (((((gm * ((((gm * p_x) * u_x) + ((gm * p) * u_xx)) + ((u_x * p_x) + (u * p_xx)))) * u_x) + ((gm * (((gm * p) * u_x) + (u * p_x))) * u_xx)) + (((gm * p_x) * (((u_x * u_x) + (u * u_xx)) + ((b_x * p_x) + (b * p_xx)))) + ((gm * p) * ((((u_xx * u_x) + (u_x * u_xx)) + ((u_x * u_xx) + (u * u_xxx))) + (((b_xx * p_x) + (b_x * p_xx)) + ((b_x * p_xx) + (b * p_xxx))))))) + ((((((u_x * u_x) + (u * u_xx)) + ((b_x * p_x) + (b * p_xx))) * p_x) + (((u * u_x) + (b * p_x)) * p_xx)) + ((u_x * ((((gm * p_x) * u_x) + ((gm * p) * u_xx)) + ((u_x * p_x) + (u * p_xx)))) + (u * (((((gm * p_xx) * u_x) + ((gm * p_x) * u_xx)) + (((gm * p_x) * u_xx) + ((gm * p) * u_xxx))) + (((u_xx * p_x) + (u_x * p_xx)) + ((u_x * p_xx) + (u * p_xxx))))))))
 end function
-
 ```
