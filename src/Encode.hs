@@ -51,7 +51,7 @@ instance Show Index where
     show Succ = "+1"
 
 dii :: Int -> Coord -> String
-dii dim i = printf "(%s + %s - 2%s - h*(%s - %s)/4)/h/h"
+dii dim i = printf "2*(%s + %s - 2%s - h*(%s - %s)/4)/h/h"
                    (a Succ) (a Pre) (a Zero) (ai Succ) (ai Pre)
     where
         index ix | dim == 1 = bracket ["i" ++ show ix]
