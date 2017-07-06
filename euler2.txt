@@ -1,0 +1,4 @@
+b[t,x,y]_t = b[t,x,y]*(u[t,x,y]_x + v[t,x,y]_y) - (b[t,x,y]_x*u[t,x,y] + b[t,x,y]_y*v[t,x,y])
+u[t,x,y]_t = -(u[t,x,y]*u[t,x,y]_x + v[t,x,y]*u[t,x,y]_y + b[t,x,y]*p[t,x,y]_x)
+v[t,x,y]_t = -(u[t,x,y]*v[t,x,y]_x + v[t,x,y]*v[t,x,y]_y + b[t,x,y]*p[t,x,y]_y)
+p[t,x,y]_t = -(gm*p[t,x,y]*(u[t,x,y]_x + v[t,x,y]_y) + u[t,x,y]*p[t,x,y]_x + v[t,x,y]*p[t,x,y]_y)
