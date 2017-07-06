@@ -51,7 +51,7 @@ instance Show Index where
     show Succ = "+1"
 
 dii :: Int -> Coord -> String
-dii dim i = printf "2*(%s + %s - 2%s - h*(%s - %s)/4)/h/h"
+dii dim i = printf "2*(%s + %s - 2*%s - h*(%s - %s)/4)/h/h"
                    (a Succ) (a Pre) (a Zero) (ai Succ) (ai Pre)
     where
         index ix | dim == 1 = bracket ["i" ++ show ix]
@@ -78,7 +78,7 @@ dij dim [i,j] = printf "(%s + %s - %s - %s)/2/h/h - (%s - %s - %s + %s + %s - %s
         aj di dj = "a_" ++ show j ++ index di dj
 
 diii :: Int -> Coord -> String
-diii dim i = printf "(%s + %s - 2%s)/h/h" (ai Succ) (ai Pre) (ai Zero)
+diii dim i = printf "(%s + %s - 2*%s)/h/h" (ai Succ) (ai Pre) (ai Zero)
     where
         index ix | dim == 1 = bracket ["i" ++ show ix]
                  | dim == 2 && i == X = bracket ["i" ++ show ix, "j"]
@@ -89,7 +89,7 @@ diii dim i = printf "(%s + %s - 2%s)/h/h" (ai Succ) (ai Pre) (ai Zero)
         ai ix = "a_" ++ show i ++ index ix
 
 diij :: Int -> [Coord] -> String
-diij dim [i,j] = printf "(%s + %s - 2%s)/h/h" (aj Succ) (aj Pre) (aj Zero)
+diij dim [i,j] = printf "(%s + %s - 2*%s)/h/h" (aj Succ) (aj Pre) (aj Zero)
     where
         index ix | dim == 2 && i == X = bracket ["i" ++ show ix, "j"]
                  | dim == 2 && i == Y = bracket ["i", "j" ++ show ix]
