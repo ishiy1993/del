@@ -15,10 +15,15 @@ toCode eom = unlines $
     [ "dimension :: " ++ show dim
     , "axes :: " ++ intercalate "," (map show axes)
     , ""
+    , "double :: h"
+    , "double :: s"
+    , ""
     , defDiffs axes
+    , defSmoo dim
+    , ""
     , encode eom
-    , encode eomT
-    ] ++ concatMap (\i -> map (encode . diffBy i) [eom, eomT]) axes
+    , encode eomT ]
+    ++ concatMap (\i -> map (encode . diffBy i) [eom, eomT]) axes
     where
         dim = length axes
         axes = S.toList $ S.delete T $ maximumBy (comparing S.size) $ map (dependOn . lhs) eom
@@ -158,6 +163,13 @@ mkEq n as ds = unwords [l, "=", r]
     where
         l = n ++ formatDiff ds
         r = "d" ++ formatDiff ds ++ paren (n : map (\i->n++"_"++show i) as)
+
+defSmoo :: Int -> String
+defSmoo dim = "smoo = fun(a) " ++ body dim
+    where
+        body 1 = "-s*a[i] + s*(a[i+1] + a[i-1])/2"
+        body 2 = "-s*a[i,j] + s*(a[i+1,j] + a[i-1,j] + a[i,j+1] + a[i,j-1])/4"
+        body 3 = "-s*a[i,j,k] + s*(a[i+1,j,k] + a[i-1,j,k] + a[i,j+1,k] + a[i,j-1,k] + a[i,j,k+1] + a[i,j,k-1])/6"
 
 paren :: [String] -> String
 paren ss = "(" ++ intercalate "," ss ++ ")"
