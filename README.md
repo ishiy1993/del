@@ -2,12 +2,16 @@
 EOMから袖1スキームを導出する
 
 ```
-$ stack exec -- mk-sode1 "euler1.txt"
 dimension :: 1
 axes :: x
 
-d_xx = fun(a,a_x) 2*(a[i+1] + a[i-1] - 2a[i] - h*(a_x[i+1] - a_x[i-1])/4)/h/h
-d_xxx = fun(a,a_x) (a_x[i+1] + a_x[i-1] - 2a_x[i])/h/h
+double :: h
+double :: s
+
+d_xx = fun(a,a_x) 2*(a[i+1] + a[i-1] - 2*a[i] - h*(a_x[i+1] - a_x[i-1])/4)/h/h
+d_xxx = fun(a,a_x) (a_x[i+1] + a_x[i-1] - 2*a_x[i])/h/h
+
+smoo = fun(a) -s*a[i] + s*(a[i+1] + a[i-1])/2
 
 begin function (b_t,u_t,p_t) = d_t((b,u,p),(b_x,u_x,p_x))
 b_t = ((b * u_x) - (b_x * u))
