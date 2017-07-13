@@ -11,7 +11,7 @@ import Lib
 import Syntax
 
 toCode :: EOM -> String
-toCode eom = unlines $
+toCode eom = unlines
     [ "dimension :: " ++ show dim
     , "axes :: " ++ intercalate "," (map show axes)
     , ""
@@ -19,18 +19,17 @@ toCode eom = unlines $
     , "double :: s"
     , ""
     , defDiffs axes
+    , ""
     , defSmoo dim
     , ""
-    , encode eom
-    , encode eomT ]
-    ++ concatMap (\i -> map (encode . diffBy i) [eom, eomT]) axes
+    , defFuns eom axes
+    ]
     where
         dim = length axes
         axes = S.toList $ S.delete T $ maximumBy (comparing S.size) $ map (dependOn . lhs) eom
-        eomT = diffByT eom
 
 defDiffs :: [Coord] -> String
-defDiffs axes = unlines $ defDiff2 axes ++ defDiff3 axes
+defDiffs axes = joinLines $ defDiff2 axes ++ defDiff3 axes
 
 defDiff :: [Coord] -> Coords -> String
 defDiff as ds = unwords [l, "=", r]
@@ -112,6 +111,19 @@ defDiff2 axes = map (defDiff axes) [MS.fromList [i,j] | i <- axes, j <- filter (
 defDiff3 :: [Coord] -> [String]
 defDiff3 axes = map (defDiff axes) [MS.fromList [i,j,k] | i <- axes, j <- filter (>=i) axes, k <- filter (>=j) axes]
 
+defSmoo :: Int -> String
+defSmoo dim = "smoo = fun(a) " ++ body dim
+    where
+        body 1 = "-s*a[i] + s*(a[i+1] + a[i-1])/2"
+        body 2 = "-s*a[i,j] + s*(a[i+1,j] + a[i-1,j] + a[i,j+1] + a[i,j-1])/4"
+        body 3 = "-s*a[i,j,k] + s*(a[i+1,j,k] + a[i-1,j,k] + a[i,j+1,k] + a[i,j-1,k] + a[i,j,k+1] + a[i,j,k-1])/6"
+
+defFuns :: EOM -> [Coord] -> String
+defFuns eom axes = joinLines $ map encode es ++ concatMap (\i -> map (encode . diffBy i) es) axes
+    where
+        eomT = diffByT eom
+        es = [eom, eomT]
+
 encode :: EOM -> String
 encode eom = unlines $ [header]
                      ++ diffs
@@ -164,15 +176,11 @@ mkEq n as ds = unwords [l, "=", r]
         l = n ++ formatDiff ds
         r = "d" ++ formatDiff ds ++ paren (n : map (\i->n++"_"++show i) as)
 
-defSmoo :: Int -> String
-defSmoo dim = "smoo = fun(a) " ++ body dim
-    where
-        body 1 = "-s*a[i] + s*(a[i+1] + a[i-1])/2"
-        body 2 = "-s*a[i,j] + s*(a[i+1,j] + a[i-1,j] + a[i,j+1] + a[i,j-1])/4"
-        body 3 = "-s*a[i,j,k] + s*(a[i+1,j,k] + a[i-1,j,k] + a[i,j+1,k] + a[i,j-1,k] + a[i,j,k+1] + a[i,j,k-1])/6"
-
 paren :: [String] -> String
 paren ss = "(" ++ intercalate "," ss ++ ")"
 
 bracket :: [String] -> String
 bracket ss = "[" ++ intercalate "," ss ++ "]"
+
+joinLines :: [String] -> String
+joinLines = intercalate "\n"
