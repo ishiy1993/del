@@ -23,6 +23,7 @@ toCode eom = unlines
     , defSmoo dim
     , ""
     , defFuns eom axes
+    , defInit eom axes
     ]
     where
         dim = length axes
@@ -175,6 +176,19 @@ mkEq n as ds = unwords [l, "=", r]
     where
         l = n ++ formatDiff ds
         r = "d" ++ formatDiff ds ++ paren (n : map (\i->n++"_"++show i) as)
+
+defInit :: EOM -> [Coord] -> String
+defInit = defMainFun (\vs -> unwords [paren vs, "=", "init()"]) (\vs -> "double :: " ++ intercalate "," (map (++" = 0") vs))
+
+defFun :: String -> String -> String
+defFun h b = unlines ["begin function " ++ h, b, "end function"]
+
+defMainFun :: ([String] -> String) -> ([String] -> String) -> EOM -> [Coord] -> String
+defMainFun h b eom axes = defFun (h vs'') (b vs'')
+    where addPostfix p (Sym n as ds) = Sym (n++p) as ds
+          vs = map ((\e->e{differentiatedBy = MS.empty}) . lhs) eom
+          vs' = id:map d axes <*> ([id, addPostfix "p", addPostfix "h"] <*> vs)
+          vs'' = map encodeExp vs'
 
 paren :: [String] -> String
 paren ss = "(" ++ intercalate "," ss ++ ")"
