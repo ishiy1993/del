@@ -1,7 +1,7 @@
 module Encode where
 
 import Data.Ord (comparing)
-import Data.List (intercalate, maximumBy, sortBy)
+import Data.List (intercalate, maximumBy, sortBy, unfoldr)
 import qualified Data.Set as S
 import qualified Data.MultiSet as MS
 import Text.Printf
@@ -15,8 +15,10 @@ toCode eom = unlines
     [ "dimension :: " ++ show dim
     , "axes :: " ++ intercalate "," (map show axes)
     , ""
-    , "double :: h"
+    , "double :: cfl"
     , "double :: s"
+    , "double :: h"
+    , "double :: dt = cfl*h"
     , ""
     , defDiffs axes
     , ""
@@ -24,6 +26,7 @@ toCode eom = unlines
     , ""
     , defFuns eom axes
     , defInit eom axes
+    , defStep eom axes dim
     ]
     where
         dim = length axes
@@ -178,7 +181,38 @@ mkEq n as ds = unwords [l, "=", r]
         r = "d" ++ formatDiff ds ++ paren (n : map (\i->n++"_"++show i) as)
 
 defInit :: EOM -> [Coord] -> String
-defInit = defMainFun (\vs -> unwords [paren vs, "=", "init()"]) (\vs -> "double :: " ++ intercalate "," (map (++" = 0") vs))
+defInit = defMainFun (\vs -> unwords [paren vs, "=", "init()"])
+                     (\vs -> "double :: " ++ intercalate "," (map (++" = 0") vs))
+
+defStep :: EOM -> [Coord] -> Int -> String
+defStep eom axes dim = defMainFun header body eom axes
+    where
+        header vs = unwords [paren $ map (++"'") vs, "=", "step" ++ paren vs]
+        body vs = joinLines [ toQ
+                            , diffs
+                            , updateQs
+                            , updateQps
+                            , updateQhs
+                            , fromQ
+                            ]
+            where
+                addDiffs = id:map (\i q -> q ++ "_" ++ show i) axes
+                qs = addDiffs <*> ["q","qp","qh"]
+                vss = unfoldr (\xs -> if null xs then Nothing else Just (splitAt (dim+2) xs)) vs
+                toQ = unlines $ zipWith (\q v->unwords [q,"=",paren v]) qs vss
+                diffs = let as = paren $ addDiffs <*> ["qp"]
+                            is = id:[(++show i) | i <- axes] <*> map ("_"++) ["t","tt"]
+                         in unlines $ map (\i -> unwords ["q"++i,"=","d"++i++as]) is
+                updateQs = unlines $ map updateQ (Nothing:map Just axes)
+                updateQ Nothing = "q' = qh + dt*q_t/2 - dt*dt*q_tt/12"
+                updateQ (Just i) = let i' = show i in "q_"++i'++"' = qh_"++i'++" + dt*q_t"++i'++"/2 - dt*dt*q_tt"++i'++"/12"
+                updateQps = unlines $ map updateQp (Nothing:map Just axes)
+                updateQp Nothing = "qp' = q' + dt*q_t + dt*dt*q_tt/2 + smoo(qp)"
+                updateQp (Just i) = let i' = show i in "qp_"++i'++"' = q_"++i'++"' + dt*q_t"++i'++" + dt*dt*q_tt"++i'++"/2 + smoo(qp_"++i'++")"
+                updateQhs = unlines $ map updateQh (Nothing:map Just axes)
+                updateQh Nothing = "qh' = q' + dt*q_t/2 + dt*dt*q_tt/12 + smoo(qh)"
+                updateQh (Just i) = let i' = show i in "qh_"++i'++"' = q_"++i'++"' + dt*q_t"++i'++"/2 + dt*dt*q_tt"++i'++"/12 + smoo(qh_"++i'++")"
+                fromQ = joinLines $ zipWith (\q v->unwords [paren $ map (++"'") v, "=", q++"'"]) qs vss
 
 defFun :: String -> String -> String
 defFun h b = unlines ["begin function " ++ h, b, "end function"]
