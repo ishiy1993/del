@@ -1,3 +1,5 @@
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE TypeFamilies #-}
 module Encode where
 
 import Data.Ord (comparing)
@@ -57,6 +59,26 @@ instance Show Index where
     show Pre = "-1"
     show Zero = ""
     show Succ = "+1"
+
+class ShowIndex a where
+    type family Form a :: *
+    showIndex :: Int -> Form a -> a -> String
+
+instance ShowIndex Index where
+    type Form Index = Coord
+    showIndex dim i di | dim == 1 = bracket ["i" ++ show di]
+                       | dim == 2 && i == X = bracket ["i" ++ show di, "j"]
+                       | dim == 2 && i == Y = bracket ["i", "j" ++ show di]
+                       | dim == 3 && i == X = bracket ["i" ++ show di, "j", "k"]
+                       | dim == 3 && i == Y = bracket ["i", "j" ++ show di, "k"]
+                       | dim == 3 && i == Z = bracket ["i", "j", "k" ++ show di]
+
+instance ShowIndex (Index,Index) where
+    type Form (Index,Index) = (Coord, Coord)
+    showIndex dim (i,j) (di,dj) | dim == 2 = bracket ["i" ++ show di, "j" ++ show dj]
+                                | dim == 3 && (i,j) == (X,Y) = bracket ["i" ++ show di, "j" ++ show dj, "k"]
+                                | dim == 3 && (i,j) == (X,Z) = bracket ["i" ++ show di, "j", "k" ++ show dj]
+                                | dim == 3 && (i,j) == (Y,Z) = bracket ["i", "j" ++ show di, "k" ++ show dj]
 
 dii :: Int -> Coord -> String
 dii dim i = printf "2*(%s + %s - 2*%s - h*(%s - %s)/4)/h/h"
