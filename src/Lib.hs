@@ -1,9 +1,12 @@
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE TypeSynonymInstances #-}
 module Lib where
 
 import Data.List (sortOn, groupBy, foldl1')
 import qualified Data.Set as S
 import Data.Maybe (fromJust, isJust)
 import qualified Data.MultiSet as MS
+import qualified Data.HashMap.Lazy as HM
 
 import Syntax
 
@@ -44,7 +47,12 @@ d i (Sub e1 e2) = Sub (d i e1) (d i e2)
 simplify :: Exp -> Exp
 simplify = rebuild . eval . flatten . expand . cleanup
 
-type Term = MS.MultiSet Exp
+-- type Term = MS.MultiSet Exp
+type Term = HM.HashMap Exp Int
+
+instance Ord Term where
+    compare t1 t2 = compare (HM.keys t1) (HM.keys t2)
+    (<=) t1 t2 = (<=) (HM.keys t1) (HM.keys t2)
 
 cleanup :: Exp -> Exp
 cleanup e | cleanupable e = cleanup $ cleanup' e
@@ -117,12 +125,12 @@ flatten :: Exp -> [(Double, Term)]
 flatten (Add e1 e2) = flatten e1 ++ flatten e2
 flatten (Sub e1 e2) = flatten e1 ++ flatten (expand $ Mul (Num (-1)) e2)
 flatten (Mul e1 e2) = merge (flatten e1) (flatten e2)
-flatten s@Sym{} = [(1, MS.singleton s)]
-flatten (Num x) = [(x, MS.empty)]
+flatten s@Sym{} = [(1, HM.singleton s 1)]
+flatten (Num x) = [(x, HM.empty)]
 flatten _ = []
 
 merge :: [(Double, Term)] -> [(Double, Term)] -> [(Double, Term)]
-merge e1 e2 = [foldr (\(a,t) (a',t') -> (a*a', MS.union t t')) (1,MS.empty) $ e1 ++ e2]
+merge e1 e2 = [foldr (\(a,t) (a',t') -> (a*a', HM.unionWith (+) t t')) (1,HM.empty) $ e1 ++ e2]
 
 eval :: [(Double,Term)] -> [(Double, Term)]
 eval = foldr (\xs acc -> eval' xs:acc) [] . groupBy (\x y -> snd x == snd y) . sortOn snd
@@ -138,4 +146,5 @@ rebuild = foldl1' build . map fromJust . filter isJust . map toExp
                     | x == -1 = Just $ Neg $ toExp' t
                     | x < -1 = Just $ Neg $ Mul (Num $ negate x) (toExp' t)
                     | otherwise = Just $ Mul (Num x) (toExp' t)
-        toExp' = foldl1' Mul . MS.toList
+        -- toExp' also ignore Div
+        toExp' = foldl1' Mul . concatMap (\(t, i) -> replicate i t) . HM.toList

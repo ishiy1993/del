@@ -1,7 +1,12 @@
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE TypeSynonymInstances #-}
 module Syntax where
 
+import Data.Hashable (Hashable(..))
 import qualified Data.Set as S
 import qualified Data.MultiSet as MS
+import GHC.Generics (Generic)
 
 type EOM = [Equation]
 data Equation = Equation { lhs :: Exp
@@ -18,11 +23,13 @@ data Exp = Num Double
          | Mul Exp Exp
          | Sub Exp Exp
          | Div Exp Exp
-         deriving (Show, Eq, Ord)
+         deriving (Show, Eq, Ord, Generic)
+
+instance Hashable Exp
 
 type Arg = S.Set Coord
 type Coords = MS.MultiSet Coord
-data Coord = T | X | Y | Z deriving (Eq, Ord)
+data Coord = T | X | Y | Z deriving (Eq, Ord, Generic)
 
 instance Show Coord where
     show T = "t"
@@ -30,3 +37,10 @@ instance Show Coord where
     show Y = "y"
     show Z = "z"
 
+instance Hashable Coord
+
+instance Hashable Arg where
+    hashWithSalt i = hashWithSalt i . S.toList
+
+instance Hashable Coords where
+    hashWithSalt i = hashWithSalt i . MS.toList
