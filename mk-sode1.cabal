@@ -37,12 +37,14 @@ executable mk-sode1
                      , mk-sode1
   default-language:    Haskell2010
 
-test-suite mk-sode1-test
+test-suite spec
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
   main-is:             Spec.hs
+  other-modules:       EncodeSpec
   build-depends:       base
                      , mk-sode1
+                     , hspec
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   default-language:    Haskell2010
 
