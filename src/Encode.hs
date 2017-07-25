@@ -84,14 +84,8 @@ dii :: Int -> Coord -> String
 dii dim i = printf "2*(%s + %s - 2*%s - h*(%s - %s)/4)/h/h"
                    (a Succ) (a Pre) (a Zero) (ai Succ) (ai Pre)
     where
-        index ix | dim == 1 = bracket ["i" ++ show ix]
-                 | dim == 2 && i == X = bracket ["i" ++ show ix, "j"]
-                 | dim == 2 && i == Y = bracket ["i", "j" ++ show ix]
-                 | dim == 3 && i == X = bracket ["i" ++ show ix, "j", "k"]
-                 | dim == 3 && i == Y = bracket ["i", "j" ++ show ix, "k"]
-                 | dim == 3 && i == Z = bracket ["i", "j", "k" ++ show ix]
-        a ix = "a" ++ index ix
-        ai ix = "a_" ++ show i ++ index ix
+        a ix = "a" ++ showIndex dim i ix
+        ai ix = "a_" ++ show i ++ showIndex dim i ix
 
 dij :: Int -> [Coord] -> String
 dij dim [i,j] = printf "(%s + %s - %s - %s)/2/h/h - (%s - %s - %s + %s + %s - %s + %s - %s)/8/h"
@@ -99,34 +93,19 @@ dij dim [i,j] = printf "(%s + %s - %s - %s)/2/h/h - (%s - %s - %s + %s + %s - %s
                        (ai Succ Succ) (ai Pre Pre) (ai Succ Pre) (ai Pre Succ)
                        (aj Succ Succ) (aj Pre Pre) (aj Succ Pre) (aj Pre Succ)
     where
-        index di dj | dim == 2 = bracket ["i" ++ show di, "j" ++ show dj]
-                    | dim == 3 && (i,j) == (X,Y) = bracket ["i" ++ show di, "j" ++ show dj, "k"]
-                    | dim == 3 && (i,j) == (X,Z) = bracket ["i" ++ show di, "j", "k" ++ show dj]
-                    | dim == 3 && (i,j) == (Y,Z) = bracket ["i", "j" ++ show di, "k" ++ show dj]
-        a di dj = "a" ++ index di dj
-        ai di dj = "a_" ++ show i ++ index di dj
-        aj di dj = "a_" ++ show j ++ index di dj
+        a di dj = "a" ++ showIndex dim (i,j) (di,dj)
+        ai di dj = "a_" ++ show i ++ showIndex dim (i,j) (di,dj)
+        aj di dj = "a_" ++ show j ++ showIndex dim (i,j) (di,dj)
 
 diii :: Int -> Coord -> String
 diii dim i = printf "(%s + %s - 2*%s)/h/h" (ai Succ) (ai Pre) (ai Zero)
     where
-        index ix | dim == 1 = bracket ["i" ++ show ix]
-                 | dim == 2 && i == X = bracket ["i" ++ show ix, "j"]
-                 | dim == 2 && i == Y = bracket ["i", "j" ++ show ix]
-                 | dim == 3 && i == X = bracket ["i" ++ show ix, "j", "k"]
-                 | dim == 3 && i == Y = bracket ["i", "j" ++ show ix, "k"]
-                 | dim == 3 && i == Z = bracket ["i", "j", "k" ++ show ix]
-        ai ix = "a_" ++ show i ++ index ix
+        ai ix = "a_" ++ show i ++ showIndex dim i ix
 
 diij :: Int -> [Coord] -> String
 diij dim [i,j] = printf "(%s + %s - 2*%s)/h/h" (aj Succ) (aj Pre) (aj Zero)
     where
-        index ix | dim == 2 && i == X = bracket ["i" ++ show ix, "j"]
-                 | dim == 2 && i == Y = bracket ["i", "j" ++ show ix]
-                 | dim == 3 && i == X = bracket ["i" ++ show ix, "j", "k"]
-                 | dim == 3 && i == Y = bracket ["i", "j" ++ show ix, "k"]
-                 | dim == 3 && i == Z = bracket ["i", "j", "k" ++ show ix]
-        aj ix = "a_" ++ show j ++ index ix
+        aj ix = "a_" ++ show j ++ showIndex dim i ix
 
 dijk :: String
 dijk = "(a_z[i+1,j+1,k] + a_z[i-1,j-1,k] - a_z[i+1,j-1,k] - a_z[i-1,j+1,k])/4/h/h"
