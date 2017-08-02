@@ -2,6 +2,7 @@
 EOMから袖1スキームを導出する
 
 ```
+$ stack exec -- mk-sode1 "euler1.txt"
 dimension :: 1
 axes :: x
 
