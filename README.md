@@ -26,18 +26,18 @@ begin function (b_tt,u_tt,p_tt) = d_tt((b,u,p),(b_x,u_x,p_x))
 b_xx = d_xx(b,b_x)
 u_xx = d_xx(u,u_x)
 p_xx = d_xx(p,p_x)
-b_tt = (((-(2.0 * ((b * u) * u_xx))) - ((b * b) * p_xx)) + ((b_xx * u) * u))
-u_tt = (((((((((b * gm) * p) * u_xx) + (((b * gm) * p_x) * u_x)) + ((b * p_x) * u_x)) + (2.0 * ((b * p_xx) * u))) + (2.0 * ((b_x * p_x) * u))) + (2.0 * ((u * u_x) * u_x))) + ((u * u) * u_xx))
-p_tt = (((((((((((b * gm) * p) * p_xx) + ((b * p_x) * p_x)) + (((b_x * gm) * p) * p_x)) + (2.0 * (((gm * p) * u) * u_xx))) + (((gm * p) * u_x) * u_x)) + (2.0 * (((gm * p_x) * u) * u_x))) + ((((gm * gm) * p) * u_x) * u_x)) + (2.0 * ((p_x * u) * u_x))) + ((p_xx * u) * u))
+b_tt = (((-((b * b) * p_xx)) + ((b_xx * u) * u)) - (2.0 * ((u_xx * b) * u)))
+u_tt = (((((((2.0 * ((b * u) * p_xx)) + (2.0 * ((b_x * p_x) * u))) + ((u_x * b) * p_x)) + (((u_x * b) * p_x) * gm)) + (2.0 * ((u_x * u_x) * u))) + (((u_xx * b) * p) * gm)) + ((u_xx * u) * u))
+p_tt = (((((((((((b * p) * gm) * p_xx) + ((b * p_x) * p_x)) + (((b_x * p) * p_x) * gm)) + ((u * u) * p_xx)) + ((((u_x * u_x) * p) * gm) * gm)) + (((u_x * u_x) * p) * gm)) + (2.0 * ((u_x * p_x) * u))) + (2.0 * (((u_x * p_x) * u) * gm))) + (2.0 * (((u_xx * p) * u) * gm)))
 end function
 
 begin function (b_tx,u_tx,p_tx) = d_tx((b,u,p),(b_x,u_x,p_x))
 b_xx = d_xx(b,b_x)
 u_xx = d_xx(u,u_x)
 p_xx = d_xx(p,p_x)
-b_tx = ((b * u_xx) - (b_xx * u))
-u_tx = ((((-(b * p_xx)) - (b_x * p_x)) - (u * u_xx)) - (u_x * u_x))
-p_tx = ((((-((gm * p) * u_xx)) - ((gm * p_x) * u_x)) - (p_x * u_x)) - (p_xx * u))
+b_tx = ((-(b_xx * u)) + (u_xx * b))
+u_tx = ((((-(b * p_xx)) - (b_x * p_x)) - (u_x * u_x)) - (u_xx * u))
+p_tx = ((((-(u * p_xx)) - (u_x * p_x)) - ((u_x * p_x) * gm)) - ((u_xx * p) * gm))
 end function
 
 begin function (b_ttx,u_ttx,p_ttx) = d_ttx((b,u,p),(b_x,u_x,p_x))
@@ -47,13 +47,13 @@ u_xx = d_xx(u,u_x)
 u_xxx = d_xxx(u,u_x)
 p_xx = d_xx(p,p_x)
 p_xxx = d_xxx(p,p_x)
-b_ttx = (((((((-(2.0 * ((b * b_x) * p_xx))) - (2.0 * ((b * u) * u_xxx))) - (2.0 * ((b * u_x) * u_xx))) - ((b * b) * p_xxx)) - (2.0 * ((b_x * u) * u_xx))) + (2.0 * ((b_xx * u) * u_x))) + ((b_xxx * u) * u))
-u_ttx = ((((((((((((((((b * gm) * p) * u_xxx) + (2.0 * (((b * gm) * p_x) * u_xx))) + (((b * gm) * p_xx) * u_x)) + ((b * p_x) * u_xx)) + (3.0 * ((b * p_xx) * u_x))) + (2.0 * ((b * p_xxx) * u))) + (((b_x * gm) * p) * u_xx)) + (((b_x * gm) * p_x) * u_x)) + (3.0 * ((b_x * p_x) * u_x))) + (4.0 * ((b_x * p_xx) * u))) + (2.0 * ((b_xx * p_x) * u))) + (6.0 * ((u * u_x) * u_xx))) + ((u * u) * u_xxx)) + (2.0 * ((u_x * u_x) * u_x)))
-p_ttx = ((((((((((((((((((((b * gm) * p) * p_xxx) + (((b * gm) * p_x) * p_xx)) + (2.0 * ((b * p_x) * p_xx))) + (2.0 * (((b_x * gm) * p) * p_xx))) + (((b_x * gm) * p_x) * p_x)) + ((b_x * p_x) * p_x)) + (((b_xx * gm) * p) * p_x)) + (2.0 * (((gm * p) * u) * u_xxx))) + (4.0 * (((gm * p) * u_x) * u_xx))) + (4.0 * (((gm * p_x) * u) * u_xx))) + (3.0 * (((gm * p_x) * u_x) * u_x))) + (2.0 * (((gm * p_xx) * u) * u_x))) + (2.0 * ((((gm * gm) * p) * u_x) * u_xx))) + ((((gm * gm) * p_x) * u_x) * u_x)) + (2.0 * ((p_x * u) * u_xx))) + (2.0 * ((p_x * u_x) * u_x))) + (4.0 * ((p_xx * u) * u_x))) + ((p_xxx * u) * u))
+b_ttx = (((((((-((b * b) * p_xxx)) - (2.0 * ((b * u_xxx) * u))) - (2.0 * ((b_x * b) * p_xx))) + ((b_xxx * u) * u)) + (2.0 * ((u_x * b_xx) * u))) - (2.0 * ((u_xx * b_x) * u))) - (2.0 * ((u_xx * u_x) * b)))
+u_ttx = ((((((((((((((((b * p) * u_xxx) * gm) + (2.0 * ((b * u) * p_xxx))) + (4.0 * ((b_x * u) * p_xx))) + (2.0 * ((p_x * b_xx) * u))) + (2.0 * ((u_x * u_x) * u_x))) + (((u_x * b) * gm) * p_xx)) + (3.0 * ((u_x * b) * p_xx))) + (3.0 * ((u_x * b_x) * p_x))) + (((u_x * b_x) * p_x) * gm)) + ((u_xx * b) * p_x)) + (2.0 * (((u_xx * b) * p_x) * gm))) + (((u_xx * b_x) * p) * gm)) + (6.0 * ((u_xx * u_x) * u))) + ((u_xxx * u) * u))
+p_ttx = ((((((((((((((((((((b * p) * gm) * p_xxx) + (((b * p_x) * gm) * p_xx)) + (2.0 * ((b * p_x) * p_xx))) + (2.0 * (((b_x * p) * gm) * p_xx))) + ((b_x * p_x) * p_x)) + (((b_x * p_x) * p_x) * gm)) + (((p * p_x) * b_xx) * gm)) + (2.0 * (((p * u_xxx) * u) * gm))) + ((u * u) * p_xxx)) + (2.0 * ((u_x * u_x) * p_x))) + ((((u_x * u_x) * p_x) * gm) * gm)) + (3.0 * (((u_x * u_x) * p_x) * gm))) + (2.0 * (((u_x * u) * gm) * p_xx))) + (4.0 * ((u_x * u) * p_xx))) + (2.0 * ((u_xx * p_x) * u))) + (4.0 * (((u_xx * p_x) * u) * gm))) + (2.0 * ((((u_xx * u_x) * p) * gm) * gm))) + (4.0 * (((u_xx * u_x) * p) * gm)))
 end function
 
 begin function (b,u,p,bp,up,pp,bh,uh,ph,b_x,u_x,p_x,bp_x,up_x,pp_x,bh_x,uh_x,ph_x) = init()
-double :: b = 0,u = 0,p = 0,bp = 0,up = 0,pp = 0,bh = 0,uh = 0,ph = 0,b_x = 0,u_x = 0,p_x = 0,bp_x = 0,up_x = 0,pp_x = 0,bh_x = 0,uh_x = 0,ph_x = 0
+double [] :: b = 0,u = 0,p = 0,bp = 0,up = 0,pp = 0,bh = 0,uh = 0,ph = 0,b_x = 0,u_x = 0,p_x = 0,bp_x = 0,up_x = 0,pp_x = 0,bh_x = 0,uh_x = 0,ph_x = 0
 end function
 
 begin function (b',u',p',bp',up',pp',bh',uh',ph',b_x',u_x',p_x',bp_x',up_x',pp_x',bh_x',uh_x',ph_x') = step(b,u,p,bp,up,pp,bh,uh,ph,b_x,u_x,p_x,bp_x,up_x,pp_x,bh_x,uh_x,ph_x)
