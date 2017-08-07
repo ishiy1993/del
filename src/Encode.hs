@@ -183,7 +183,7 @@ mkEq n as ds = unwords [l, "=", r]
 
 defInit :: EOM -> [Coord] -> String
 defInit = defMainFun (\vs -> unwords [paren vs, "=", "init()"])
-                     (\vs -> "double :: " ++ intercalate "," (map (++" = 0") vs))
+                     (\vs -> "double [] :: " ++ intercalate "," (map (++" = 0") vs))
 
 defStep :: EOM -> [Coord] -> Int -> String
 defStep eom axes dim = defMainFun header body eom axes
