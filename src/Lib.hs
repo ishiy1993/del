@@ -6,7 +6,7 @@ import Data.List (sortOn, groupBy, foldl1')
 import qualified Data.Set as S
 import Data.Maybe (fromJust, isJust)
 import qualified Data.MultiSet as MS
-import qualified Data.HashMap.Lazy as HM
+import qualified Data.Map as M
 
 import Syntax
 
@@ -43,18 +43,14 @@ d i (Mul e1 e2) = Add (Mul (d i e1) e2) (Mul e1 (d i e2))
 d i (Div e1 e2) = Sub (Div (d i e1) e2) (Mul (Div e1 (Mul e2 e2)) (d i e2))
 d i (Add e1 e2) = Add (d i e1) (d i e2)
 d i (Sub e1 e2) = Sub (d i e1) (d i e2)
-d i (Pow e1 (Num n)) = Mul (Num n) (Pow (d i e1) (Num $ n -1))
+d i (Pow e1 (Num n)) | n /= 0 = Mul (Mul (Num n) (Pow e1 (Num $ n -1))) (d i e1)
+                     | otherwise = Num 0.0
 
 -- This is unable to deal with Div
 simplify :: Exp -> Exp
 simplify = rebuild . eval . flatten . expand . cleanup
 
--- type Term = MS.MultiSet Exp
-type Term = HM.HashMap Exp Int
-
-instance Ord Term where
-    compare t1 t2 = compare (HM.keys t1) (HM.keys t2)
-    (<=) t1 t2 = (<=) (HM.keys t1) (HM.keys t2)
+type Term = M.Map Exp Double
 
 cleanup :: Exp -> Exp
 cleanup e | cleanupable e = cleanup $ cleanup' e
@@ -74,6 +70,9 @@ cleanup e | cleanupable e = cleanup $ cleanup' e
         cleanupable (Div e (Num 1)) = True
         cleanupable (Div (Num 0) e) = True
         cleanupable (Div e1 e2) = cleanupable e1 || cleanupable e2
+        cleanupable (Pow e1 (Num 0)) = True
+        cleanupable (Pow e1 (Num 1)) = True
+        cleanupable (Pow e1 (Neg (Num n))) = True
         cleanupable (Neg e) = True
         cleanupable e = False
 
@@ -90,7 +89,10 @@ cleanup e | cleanupable e = cleanup $ cleanup' e
         cleanup' (Mul e1 e2) = Mul (cleanup' e1) (cleanup' e2)
         cleanup' (Div e (Num 1)) = cleanup' e
         cleanup' (Div (Num 0) e) = Num 0
-        cleanup' (Div e1 e2) = Div (cleanup' e1) (cleanup' e2)
+        cleanup' (Div e1 e2) = Mul (cleanup' e1) (Pow (cleanup' e2) (Num $ -1))
+        cleanup' (Pow e1 (Num 0)) = Num 1.0
+        cleanup' (Pow e1 (Num 1)) = cleanup' e1
+        cleanup' (Pow e1 (Neg (Num n))) = Pow (cleanup' e1) (Num $ -n)
         cleanup' (Neg e) = Mul (Num (-1)) (cleanup' e)
         cleanup' e = e
 
@@ -122,17 +124,17 @@ expand e | expandable e = expand $ expand' e
         expand' (Div e1 e2) = Div (expand' e1) (expand' e2)
         expand' e = e
 
--- ignore Div
 flatten :: Exp -> [(Double, Term)]
 flatten (Add e1 e2) = flatten e1 ++ flatten e2
 flatten (Sub e1 e2) = flatten e1 ++ flatten (expand $ Mul (Num (-1)) e2)
 flatten (Mul e1 e2) = merge (flatten e1) (flatten e2)
-flatten s@Sym{} = [(1, HM.singleton s 1)]
-flatten (Num x) = [(x, HM.empty)]
+flatten (Pow e1 (Num n)) = [(1, M.singleton e1 n)]
+flatten s@Sym{} = [(1, M.singleton s 1.0)]
+flatten (Num x) = [(x, M.empty)]
 flatten _ = []
 
 merge :: [(Double, Term)] -> [(Double, Term)] -> [(Double, Term)]
-merge e1 e2 = [foldr (\(a,t) (a',t') -> (a*a', HM.unionWith (+) t t')) (1,HM.empty) $ e1 ++ e2]
+merge e1 e2 = [foldr (\(a,t) (a',t') -> (a*a', M.unionWith (+) t t')) (1,M.empty) $ e1 ++ e2]
 
 eval :: [(Double,Term)] -> [(Double, Term)]
 eval = foldr (\xs acc -> eval' xs:acc) [] . groupBy (\x y -> snd x == snd y) . sortOn snd
@@ -148,5 +150,7 @@ rebuild = foldl1' build . map fromJust . filter isJust . map toExp
                     | x == -1 = Just $ Neg $ toExp' t
                     | x < -1 = Just $ Neg $ Mul (Num $ negate x) (toExp' t)
                     | otherwise = Just $ Mul (Num x) (toExp' t)
-        -- toExp' also ignore Div
-        toExp' = foldl1' Mul . concatMap (\(t, i) -> replicate i t) . HM.toList
+        toExp' = foldl1' Mul . map build' . M.toList
+        build' (e,i) | i == 1 = e
+                     | i > 1 = Pow e (Num i)
+                     | otherwise = Pow e (Neg $ Num $ negate i)
