@@ -17,6 +17,7 @@ diffByT eom = map (\(Equation l r) -> Equation (d T l) (simplify $ replace $ d T
         replace (Sub e1 e2) = Sub (replace e1) (replace e2)
         replace (Mul e1 e2) = Mul (replace e1) (replace e2)
         replace (Div e1 e2) = Div (replace e1) (replace e2)
+        replace (Pow e1 e2) = Pow (replace e1) (replace e2)
         replace (Neg e) = Neg (replace e)
         -- Assume the size of ds is 2 at most
         replace e@(Sym n a ds)
@@ -42,6 +43,7 @@ d i (Mul e1 e2) = Add (Mul (d i e1) e2) (Mul e1 (d i e2))
 d i (Div e1 e2) = Sub (Div (d i e1) e2) (Mul (Div e1 (Mul e2 e2)) (d i e2))
 d i (Add e1 e2) = Add (d i e1) (d i e2)
 d i (Sub e1 e2) = Sub (d i e1) (d i e2)
+d i (Pow e1 (Num n)) = Mul (Num n) (Pow (d i e1) (Num $ n -1))
 
 -- This is unable to deal with Div
 simplify :: Exp -> Exp

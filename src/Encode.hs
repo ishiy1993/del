@@ -163,6 +163,7 @@ encodeExp (Mul e1 e2) = "(" ++ encodeExp e1 ++ " * " ++ encodeExp e2 ++")"
 encodeExp (Div e1 e2) = "(" ++ encodeExp e1 ++ " / " ++ encodeExp e2 ++")"
 encodeExp (Add e1 e2) = "(" ++ encodeExp e1 ++ " + " ++ encodeExp e2 ++")"
 encodeExp (Sub e1 e2) = "(" ++ encodeExp e1 ++ " - " ++ encodeExp e2 ++")"
+encodeExp (Pow e1 e2) = "(" ++ encodeExp e1 ++ " ** " ++ encodeExp e2 ++")"
 
 mkDiff :: Exp -> [String]
 mkDiff (Sym n as ds)

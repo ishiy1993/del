@@ -23,9 +23,8 @@ data Exp = Num Double
          | Mul Exp Exp
          | Sub Exp Exp
          | Div Exp Exp
-         deriving (Show, Eq, Ord, Generic)
-
-instance Hashable Exp
+         | Pow Exp Exp
+         deriving (Show, Eq, Ord)
 
 type Arg = S.Set Coord
 type Coords = MS.MultiSet Coord
