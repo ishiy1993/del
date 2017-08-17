@@ -20,6 +20,7 @@ formatExp (Mul e1 e2) = "(" ++ formatExp e1 ++ " * " ++ formatExp e2 ++")"
 formatExp (Div e1 e2) = "(" ++ formatExp e1 ++ " / " ++ formatExp e2 ++")"
 formatExp (Add e1 e2) = "(" ++ formatExp e1 ++ " + " ++ formatExp e2 ++")"
 formatExp (Sub e1 e2) = "(" ++ formatExp e1 ++ " - " ++ formatExp e2 ++")"
+formatExp (Pow e1 e2) = "(" ++ formatExp e1 ++ " ** " ++ formatExp e2 ++")"
 
 formatArg :: Arg -> String
 formatArg as | S.null as = ""

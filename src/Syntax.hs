@@ -18,6 +18,7 @@ data Exp = Num Double
          | Mul Exp Exp
          | Sub Exp Exp
          | Div Exp Exp
+         | Pow Exp Exp
          deriving (Show, Eq, Ord)
 
 type Arg = S.Set Coord

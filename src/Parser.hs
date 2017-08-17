@@ -28,13 +28,14 @@ parseEquation = do
 parseExp :: Parser Exp
 parseExp = expr
 
+-- この実装は正しくない
+-- `*`, `/` よりも `**` のほうが結合性が高くなっているが
+-- `-c**2` を `-(c**2)` ではなく `(-c)**2` と解釈してしまう。
 expr :: Parser Exp
-expr = term `chainl1` addop
+expr = (factor `chainl1` powop) `chainl1` mulop `chainl1` addop
     where addop = infixOp "+" Add <|> infixOp "-" Sub
-
-term :: Parser Exp
-term = factor `chainl1` mulop
-    where mulop = infixOp "*" Mul <|> infixOp "/" Div
+          mulop = infixOp "*" Mul <|> infixOp "/" Div
+          powop = infixOp "**" Pow
 
 infixOp :: String -> (a -> a -> a) -> Parser (a -> a -> a)
 infixOp op f = f <$ symbol op
