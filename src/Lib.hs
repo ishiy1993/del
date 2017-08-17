@@ -13,7 +13,7 @@ diffByT eom = map (\(Equation l r) -> Equation (d T l) (simplify $ replace $ d T
         replace (Add e1 e2) = Add (replace e1) (replace e2)
         replace (Sub e1 e2) = Sub (replace e1) (replace e2)
         replace (Mul e1 e2) = Mul (replace e1) (replace e2)
-        replace (Div e1 e2) = Add (replace e1) (replace e2)
+        replace (Div e1 e2) = Div (replace e1) (replace e2)
         replace (Neg e) = Neg (replace e)
         -- Assume the size of ds is 2 at most
         replace e@(Sym n a ds)
