@@ -164,10 +164,11 @@ encodeExp (Mul e1 e2) = "(" ++ encodeExp e1 ++ " * " ++ encodeExp e2 ++")"
 encodeExp (Div e1 e2) = "(" ++ encodeExp e1 ++ " / " ++ encodeExp e2 ++")"
 encodeExp (Add e1 e2) = "(" ++ encodeExp e1 ++ " + " ++ encodeExp e2 ++")"
 encodeExp (Sub e1 e2) = "(" ++ encodeExp e1 ++ " - " ++ encodeExp e2 ++")"
-encodeExp (Pow e1 (Num n)) = "(" ++ encodeExp e1 ++ " ** " ++ i ++")"
+encodeExp (Pow e1 (Num n)) = "(" ++ encodeExp e1 ++ " ** (" ++ i ++"))"
     where i = case (,) <$> numerator <*> denominator $ toRational n of
                 (n,1) -> show n
-                (n,d) -> "(" ++ show n ++ "/" ++ show d ++ ")"
+                (n,d) -> show n ++ "/" ++ show d
+encodeExp e = error $ "No pattern for " ++ show e
 
 mkDiff :: Exp -> [String]
 mkDiff (Sym n as ds)

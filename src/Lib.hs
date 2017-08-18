@@ -19,11 +19,10 @@ diffByT eom = map (\(Equation l r) -> Equation (d T l) (simplify $ replace $ d T
         replace (Div e1 e2) = Div (replace e1) (replace e2)
         replace (Pow e1 e2) = Pow (replace e1) (replace e2)
         replace (Neg e) = Neg (replace e)
-        -- Assume the size of ds is 2 at most
         replace e@(Sym n a ds)
             | d0 == ds = find e eom
-            | T `MS.member` ds = let ds' = head $ MS.toList (ds MS.\\ d0)
-                                 in  d ds' $ find (Sym n a d0) eom
+            | T `MS.member` ds = let ds' = MS.toList (ds MS.\\ d0)
+                                 in  foldr d (find (Sym n a d0) eom) ds'
             | otherwise = e
             where d0 = MS.singleton T
         replace e = e
@@ -150,7 +149,7 @@ rebuild = foldl1' build . map fromJust . filter isJust . map toExp
                     | x == -1 = Just $ Neg $ toExp' t
                     | x < -1 = Just $ Neg $ Mul (Num $ negate x) (toExp' t)
                     | otherwise = Just $ Mul (Num x) (toExp' t)
-        toExp' = foldl1' Mul . map build' . M.toList
-        build' (e,i) | i == 1 = e
-                     | i > 1 = Pow e (Num i)
-                     | otherwise = Pow e (Neg $ Num $ negate i)
+        toExp' = foldl1' Mul . foldr build' [] . M.toList
+        build' (e,i) acc | i == 1 = e:acc
+                         | i == 0 = acc
+                         | otherwise = Pow e (Num i):acc
