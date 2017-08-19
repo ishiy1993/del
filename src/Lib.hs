@@ -45,7 +45,6 @@ d i (Sub e1 e2) = Sub (d i e1) (d i e2)
 d i (Pow e1 (Num n)) | n /= 0 = Mul (Mul (Num n) (Pow e1 (Num $ n -1))) (d i e1)
                      | otherwise = Num 0.0
 
--- This is unable to deal with Div
 simplify :: Exp -> Exp
 simplify = rebuild . eval . flatten . expand . cleanup
 
