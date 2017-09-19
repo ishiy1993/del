@@ -1,4 +1,4 @@
-# mk-sode1
+# mk-sode1 [![Build Status](https://travis-ci.org/mk-sode1/mk-sode1.svg?branch=master)](https://travis-ci.org/mk-sode1/mk-sode1) 
 EOMから袖1スキームを導出する
 
 ```
