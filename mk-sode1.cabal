@@ -41,6 +41,7 @@ test-suite spec
   hs-source-dirs:      test
   main-is:             Spec.hs
   other-modules:       EncodeSpec
+                     , LibSpec
                      , ParserSpec
   build-depends:       base
                      , mk-sode1
