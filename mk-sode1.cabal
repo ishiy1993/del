@@ -25,6 +25,7 @@ library
                      , containers
                      , hashable
                      , parsers
+                     , profunctors
                      , trifecta
   default-language:    Haskell2010
 
