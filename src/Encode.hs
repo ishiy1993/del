@@ -9,7 +9,6 @@ import qualified Data.Set as S
 import qualified Data.MultiSet as MS
 import Text.Printf
 
-import Format
 import Lib
 import Syntax
 
@@ -35,12 +34,16 @@ toCode eom = unlines
         dim = length axes
         axes = S.toList $ S.delete T $ maximumBy (comparing S.size) $ map (dependOn . lhs) eom
 
+encodeDiff :: Coords -> String
+encodeDiff cs | MS.null cs = ""
+              | otherwise = "_" ++ concatMap show (MS.toAscList cs)
+
 defDiffs :: [Coord] -> String
 defDiffs axes = joinLines $ defDiff2 axes ++ defDiff3 axes
 
 defDiff :: [Coord] -> Coords -> String
 defDiff as ds = unwords [l, "=", r]
-    where l = "d" ++ formatDiff ds
+    where l = "d" ++ encodeDiff ds
           r = "fun" ++ paren ("a" : map (\i -> "a_" ++ show i) as) ++ " " ++ defDiffBody (length as) ds
 
 defDiffBody :: Int -> Coords -> String
@@ -143,12 +146,12 @@ encode eom = unlines $ [header]
         footer = "end function"
 
 leftHandSide :: [Exp] -> String
-leftHandSide = paren . map (\(Sym n _ ds) -> n ++ formatDiff ds)
+leftHandSide = paren . map (\(Sym n _ ds) -> n ++ encodeDiff ds)
 
 rightHandSide :: [Exp] -> String
 rightHandSide vs = funName ++ paren args
     where
-        funName = "d" ++ formatDiff (differentiatedBy $ head vs)
+        funName = "d" ++ encodeDiff (differentiatedBy $ head vs)
         ns = map name vs
         as = S.toList $ S.delete T $ dependOn $ head vs
         args = paren ns : [paren (map (++"_"++show a) ns) | a <- as]
@@ -158,7 +161,7 @@ encodeEquation (Equation l r) = unwords [encodeExp l, "=", encodeExp r]
 
 encodeExp :: Exp -> String
 encodeExp (Num x) = show x
-encodeExp (Sym n _ ds) = n ++ formatDiff ds
+encodeExp (Sym n _ ds) = n ++ encodeDiff ds
 encodeExp (Neg e) = "(-" ++ encodeExp e ++ ")"
 encodeExp (Mul e1 e2) = "(" ++ encodeExp e1 ++ " * " ++ encodeExp e2 ++")"
 encodeExp (Div e1 e2) = "(" ++ encodeExp e1 ++ " / " ++ encodeExp e2 ++")"
@@ -184,8 +187,8 @@ mkDiff (Sym n as ds)
 mkEq :: String -> [Coord] -> Coords -> String
 mkEq n as ds = unwords [l, "=", r]
     where
-        l = n ++ formatDiff ds
-        r = "d" ++ formatDiff ds ++ paren (n : map (\i->n++"_"++show i) as)
+        l = n ++ encodeDiff ds
+        r = "d" ++ encodeDiff ds ++ paren (n : map (\i->n++"_"++show i) as)
 
 defInit :: EOM -> [Coord] -> String
 defInit = defMainFun (\vs -> unwords [paren vs, "=", "init()"])
