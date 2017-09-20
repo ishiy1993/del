@@ -160,8 +160,8 @@ encodeEquation :: Equation -> String
 encodeEquation (Equation l r) = unwords [encodeExp l, "=", encodeExp r]
 
 encodeExp :: Exp -> String
-encodeExp (Num n) = i
-    where i = case (,) <$> numerator <*> denominator $ toRational n of
+encodeExp (Num x) = i
+    where i = case (,) <$> numerator <*> denominator $ toRational x of
                 (n,1) -> show n
                 (n,d) -> show n ++ "/" ++ show d
 encodeExp (Sym n _ ds) = n ++ encodeDiff ds
