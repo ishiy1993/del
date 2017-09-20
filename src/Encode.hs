@@ -9,38 +9,42 @@ import qualified Data.Set as S
 import qualified Data.MultiSet as MS
 import Text.Printf
 
-import Format
 import Lib
 import Syntax
 
 toCode :: EOM -> String
-toCode eom = unlines
-    [ "dimension :: " ++ show dim
-    , "axes :: " ++ intercalate "," (map show axes)
-    , ""
-    , "double :: cfl"
-    , "double :: s"
-    , "double :: h"
-    , "double :: dt = cfl*h"
-    , ""
-    , defDiffs axes
-    , ""
-    , defSmoo dim
-    , ""
-    , defFuns eom axes
-    , defInit eom axes
-    , defStep eom axes dim
-    ]
-    where
-        dim = length axes
-        axes = S.toList $ S.delete T $ maximumBy (comparing S.size) $ map (dependOn . lhs) eom
+toCode eom' = unlines
+  [ "dimension :: " ++ show dim
+  , "axes :: " ++ intercalate "," (map show axes)
+  , ""
+  , "double :: cfl"
+  , "double :: s"
+  , "double :: h"
+  , "double :: dt = cfl*h"
+  , ""
+  , defDiffs axes
+  , ""
+  , defSmoo dim
+  , ""
+  , defFuns eom axes
+  , defInit eom axes
+  , defStep eom axes dim
+  ]
+  where
+    dim = length axes
+    eom = map (\(Equation l r) -> Equation l (simplify r)) eom'
+    axes = S.toList $ S.delete T $ maximumBy (comparing S.size) $ map (dependOn . lhs) eom
+
+encodeDiff :: Coords -> String
+encodeDiff cs | MS.null cs = ""
+              | otherwise = "_" ++ concatMap show (MS.toAscList cs)
 
 defDiffs :: [Coord] -> String
 defDiffs axes = joinLines $ defDiff2 axes ++ defDiff3 axes
 
 defDiff :: [Coord] -> Coords -> String
 defDiff as ds = unwords [l, "=", r]
-    where l = "d" ++ formatDiff ds
+    where l = "d" ++ encodeDiff ds
           r = "fun" ++ paren ("a" : map (\i -> "a_" ++ show i) as) ++ " " ++ defDiffBody (length as) ds
 
 defDiffBody :: Int -> Coords -> String
@@ -143,12 +147,12 @@ encode eom = unlines $ [header]
         footer = "end function"
 
 leftHandSide :: [Exp] -> String
-leftHandSide = paren . map (\(Sym n _ ds) -> n ++ formatDiff ds)
+leftHandSide = paren . map (\(Sym n _ ds) -> n ++ encodeDiff ds)
 
 rightHandSide :: [Exp] -> String
 rightHandSide vs = funName ++ paren args
     where
-        funName = "d" ++ formatDiff (differentiatedBy $ head vs)
+        funName = "d" ++ encodeDiff (differentiatedBy $ head vs)
         ns = map name vs
         as = S.toList $ S.delete T $ dependOn $ head vs
         args = paren ns : [paren (map (++"_"++show a) ns) | a <- as]
@@ -157,18 +161,17 @@ encodeEquation :: Equation -> String
 encodeEquation (Equation l r) = unwords [encodeExp l, "=", encodeExp r]
 
 encodeExp :: Exp -> String
-encodeExp (Num x) = show x
-encodeExp (Sym n _ ds) = n ++ formatDiff ds
-encodeExp (Neg e) = "(-" ++ encodeExp e ++ ")"
-encodeExp (Mul e1 e2) = "(" ++ encodeExp e1 ++ " * " ++ encodeExp e2 ++")"
-encodeExp (Div e1 e2) = "(" ++ encodeExp e1 ++ " / " ++ encodeExp e2 ++")"
-encodeExp (Add e1 e2) = "(" ++ encodeExp e1 ++ " + " ++ encodeExp e2 ++")"
-encodeExp (Sub e1 e2) = "(" ++ encodeExp e1 ++ " - " ++ encodeExp e2 ++")"
-encodeExp (Pow e1 (Num n)) = "(" ++ encodeExp e1 ++ " ** (" ++ i ++"))"
-    where i = case (,) <$> numerator <*> denominator $ toRational n of
+encodeExp (Num x) = i
+    where i = case (,) <$> numerator <*> denominator $ toRational x of
                 (n,1) -> show n
                 (n,d) -> show n ++ "/" ++ show d
-encodeExp e = error $ "No pattern for " ++ show e
+encodeExp (Sym n _ ds) = n ++ encodeDiff ds
+encodeExp (Neg e) = "-" ++ encodeExp e
+encodeExp (Mul e1 e2) = encodeExp e1 ++ "*" ++ encodeExp e2
+encodeExp (Div e1 e2) = encodeExp e1 ++ "/" ++ encodeExp e2
+encodeExp (Add e1 e2) = encodeExp e1 ++ " + " ++ encodeExp e2
+encodeExp (Sub e1 e2) = encodeExp e1 ++ " - " ++ encodeExp e2
+encodeExp (Pow e1 e2) = "(" ++ encodeExp e1 ++ ")**(" ++ encodeExp e2 ++ ")"
 
 mkDiff :: Exp -> [String]
 mkDiff (Sym n as ds)
@@ -184,8 +187,8 @@ mkDiff (Sym n as ds)
 mkEq :: String -> [Coord] -> Coords -> String
 mkEq n as ds = unwords [l, "=", r]
     where
-        l = n ++ formatDiff ds
-        r = "d" ++ formatDiff ds ++ paren (n : map (\i->n++"_"++show i) as)
+        l = n ++ encodeDiff ds
+        r = "d" ++ encodeDiff ds ++ paren (n : map (\i->n++"_"++show i) as)
 
 defInit :: EOM -> [Coord] -> String
 defInit = defMainFun (\vs -> unwords [paren vs, "=", "init()"])
