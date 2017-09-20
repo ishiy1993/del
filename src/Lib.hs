@@ -94,6 +94,8 @@ expand = travel worker
     worker (Mul (Add e1 e2) e3) = (True, Add (Mul e1 e3) (Mul e2 e3))
     worker (Mul e1 e2) = worker2 Mul (e1,e2)
     worker (Pow (Mul e1 e2) e3) = (True, Mul (Pow e1 e3) (Pow e2 e3))
+    worker (Pow e1 (Add e2 e3)) = (True, Mul (Pow e1 e2) (Pow e1 e3))
+    worker (Pow e1 (Mul e2 e3)) = (True, Pow (Pow e1 e2) e3)
     worker (Pow e1 e2) = worker2 Pow (e1,e2)
     worker e = (False, e)
 
