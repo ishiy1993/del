@@ -114,7 +114,7 @@ eval = foldr (\xs acc -> eval' xs:acc) [] . groupBy (\x y -> snd x == snd y) . s
     where eval' = (,) <$> sum . map fst <*> snd . head
 
 compose :: [(Double,Term)] -> Exp
-compose = foldr1 Add . map build
+compose = foldl1 Add . map build
   where
     build (x,t) | x == 0 = Num 0
                 | M.null t = Num x
@@ -153,5 +153,6 @@ buildup = travel worker
     worker (Pow (Num 0) _) = (True, Num 0)
     worker (Pow e1 e2) = worker2 Pow (e1,e2)
     worker (Neg (Neg e)) = (True, e)
+    worker (Neg e) = Neg <$> worker e
     worker (Num n) | n < 0 = (True, Neg (Num $ negate n))
     worker e = (False, e)
