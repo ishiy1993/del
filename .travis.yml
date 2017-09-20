@@ -2,7 +2,6 @@ sudo: false
 language: generic
 cache:
   directories:
-  - .stack-work
   - "$HOME/.stack"
 addons:
   apt:
