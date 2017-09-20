@@ -13,26 +13,27 @@ import Lib
 import Syntax
 
 toCode :: EOM -> String
-toCode eom = unlines
-    [ "dimension :: " ++ show dim
-    , "axes :: " ++ intercalate "," (map show axes)
-    , ""
-    , "double :: cfl"
-    , "double :: s"
-    , "double :: h"
-    , "double :: dt = cfl*h"
-    , ""
-    , defDiffs axes
-    , ""
-    , defSmoo dim
-    , ""
-    , defFuns eom axes
-    , defInit eom axes
-    , defStep eom axes dim
-    ]
-    where
-        dim = length axes
-        axes = S.toList $ S.delete T $ maximumBy (comparing S.size) $ map (dependOn . lhs) eom
+toCode eom' = unlines
+  [ "dimension :: " ++ show dim
+  , "axes :: " ++ intercalate "," (map show axes)
+  , ""
+  , "double :: cfl"
+  , "double :: s"
+  , "double :: h"
+  , "double :: dt = cfl*h"
+  , ""
+  , defDiffs axes
+  , ""
+  , defSmoo dim
+  , ""
+  , defFuns eom axes
+  , defInit eom axes
+  , defStep eom axes dim
+  ]
+  where
+    dim = length axes
+    eom = map (\(Equation l r) -> Equation l (simplify r)) eom'
+    axes = S.toList $ S.delete T $ maximumBy (comparing S.size) $ map (dependOn . lhs) eom
 
 encodeDiff :: Coords -> String
 encodeDiff cs | MS.null cs = ""
