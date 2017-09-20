@@ -160,18 +160,17 @@ encodeEquation :: Equation -> String
 encodeEquation (Equation l r) = unwords [encodeExp l, "=", encodeExp r]
 
 encodeExp :: Exp -> String
-encodeExp (Num x) = show x
-encodeExp (Sym n _ ds) = n ++ encodeDiff ds
-encodeExp (Neg e) = "(-" ++ encodeExp e ++ ")"
-encodeExp (Mul e1 e2) = "(" ++ encodeExp e1 ++ " * " ++ encodeExp e2 ++")"
-encodeExp (Div e1 e2) = "(" ++ encodeExp e1 ++ " / " ++ encodeExp e2 ++")"
-encodeExp (Add e1 e2) = "(" ++ encodeExp e1 ++ " + " ++ encodeExp e2 ++")"
-encodeExp (Sub e1 e2) = "(" ++ encodeExp e1 ++ " - " ++ encodeExp e2 ++")"
-encodeExp (Pow e1 (Num n)) = "(" ++ encodeExp e1 ++ " ** (" ++ i ++"))"
+encodeExp (Num n) = i
     where i = case (,) <$> numerator <*> denominator $ toRational n of
                 (n,1) -> show n
                 (n,d) -> show n ++ "/" ++ show d
-encodeExp e = error $ "No pattern for " ++ show e
+encodeExp (Sym n _ ds) = n ++ encodeDiff ds
+encodeExp (Neg e) = "-" ++ encodeExp e
+encodeExp (Mul e1 e2) = encodeExp e1 ++ "*" ++ encodeExp e2
+encodeExp (Div e1 e2) = encodeExp e1 ++ "/" ++ encodeExp e2
+encodeExp (Add e1 e2) = encodeExp e1 ++ " + " ++ encodeExp e2
+encodeExp (Sub e1 e2) = encodeExp e1 ++ " - " ++ encodeExp e2
+encodeExp (Pow e1 e2) = "(" ++ encodeExp e1 ++ ")**(" ++ encodeExp e2 ++ ")"
 
 mkDiff :: Exp -> [String]
 mkDiff (Sym n as ds)
