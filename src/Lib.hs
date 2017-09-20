@@ -2,9 +2,13 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 module Lib where
 
-import Data.List (sortOn, groupBy, foldl1')
+import Control.Arrow (first)
+import Control.Applicative (liftA2)
+import Data.Function (fix)
+import Data.List (sortOn, groupBy)
+import Data.Monoid (Any(..))
+import Data.Profunctor (dimap)
 import qualified Data.Set as S
-import Data.Maybe (fromJust, isJust)
 import qualified Data.MultiSet as MS
 import qualified Data.Map as M
 
@@ -46,109 +50,108 @@ d i (Pow e1 (Num n)) | n /= 0 = Mul (Mul (Num n) (Pow e1 (Num $ n -1))) (d i e1)
                      | otherwise = Num 0.0
 
 simplify :: Exp -> Exp
-simplify = rebuild . eval . flatten . expand . cleanup
+simplify = buildup . compose . eval . flatten . expand . cleanup
 
 type Term = M.Map Exp Double
 
-cleanup :: Exp -> Exp
-cleanup e | cleanupable e = cleanup $ cleanup' e
-          | otherwise = e
-    where
-        cleanupable (Add (Num 0) e) = True
-        cleanupable (Add e (Num 0)) = True
-        cleanupable (Add e1 e2) = cleanupable e1 || cleanupable e2
-        cleanupable (Sub (Num 0) e) = True
-        cleanupable (Sub e (Num 0)) = True
-        cleanupable (Sub e1 e2) = cleanupable e1 || cleanupable e2
-        cleanupable (Mul (Num 1) e) = True
-        cleanupable (Mul e (Num 1)) = True
-        cleanupable (Mul (Num 0) e) = True
-        cleanupable (Mul e (Num 0)) = True
-        cleanupable (Mul e1 e2) = cleanupable e1 || cleanupable e2
-        cleanupable (Div e (Num 1)) = True
-        cleanupable (Div (Num 0) e) = True
-        cleanupable (Div e1 e2) = cleanupable e1 || cleanupable e2
-        cleanupable (Pow e1 (Num 0)) = True
-        cleanupable (Pow e1 (Num 1)) = True
-        cleanupable (Pow e1 (Neg (Num n))) = True
-        cleanupable (Neg e) = True
-        cleanupable e = False
+travel :: (a -> (Bool, a)) -> a -> a
+travel worker = fix (\f e -> let (b,e') = worker e in if b then f e' else e)
 
-        cleanup' (Add (Num 0) e) = cleanup' e
-        cleanup' (Add e (Num 0)) = cleanup' e
-        cleanup' (Add e1 e2) = Add (cleanup' e1) (cleanup' e2)
-        cleanup' (Sub (Num 0) e) = Neg (cleanup' e)
-        cleanup' (Sub e (Num 0)) = cleanup' e
-        cleanup' (Sub e1 e2) = Sub (cleanup' e1) (cleanup' e2)
-        cleanup' (Mul (Num 1) e) = cleanup' e
-        cleanup' (Mul e (Num 1)) = cleanup' e
-        cleanup' (Mul (Num 0) e) = Num 0
-        cleanup' (Mul e (Num 0)) = Num 0
-        cleanup' (Mul e1 e2) = Mul (cleanup' e1) (cleanup' e2)
-        cleanup' (Div e (Num 1)) = cleanup' e
-        cleanup' (Div (Num 0) e) = Num 0
-        cleanup' (Div e1 e2) = Mul (cleanup' e1) (Pow (cleanup' e2) (Num $ -1))
-        cleanup' (Pow e1 (Num 0)) = Num 1.0
-        cleanup' (Pow e1 (Num 1)) = cleanup' e1
-        cleanup' (Pow e1 (Neg (Num n))) = Pow (cleanup' e1) (Num $ -n)
-        cleanup' (Neg e) = Mul (Num (-1)) (cleanup' e)
-        cleanup' e = e
+-- 無駄な項を消し, 構文要素を減らす
+cleanup :: Exp -- [Add, Sub, Mul, Div, Pow, Neg, Sym, Num]
+        -> Exp -- [Add, Mul, Pow, Sym, Num]
+cleanup = travel worker
+  where
+    worker2 f = let g = first Any . worker
+                 in dimap (\(a,b)->(g a,g b)) (first getAny) (uncurry (liftA2 f))
+    m1 = Num (-1)
+    worker (Add (Num 0) e) = (True, e)
+    worker (Add e (Num 0)) = (True, e)
+    worker (Add e1 e2) = worker2 Add (e1,e2)
+    worker (Sub e1 e2) = (True, Add e1 (Mul m1 e2))
+    worker (Mul (Num 1) e) = (True, e)
+    worker (Mul e (Num 1)) = (True, e)
+    worker (Mul (Num 0) _) = (True, Num 0)
+    worker (Mul _ (Num 0)) = (True, Num 0)
+    worker (Mul e1 e2) = worker2 Mul (e1,e2)
+    worker (Div e1 e2) = (True, Mul e1 (Pow e2 m1))
+    worker (Pow e1 (Num 1)) = (True, e1)
+    worker (Pow _ (Num 0)) = (True, Num 1)
+    worker (Pow e1 e2) = worker2 Pow (e1,e2)
+    worker (Neg e) = (True, Mul m1 e)
+    worker e = (False, e)
 
+-- 積の和の形にする
 expand :: Exp -> Exp
-expand e | expandable e = expand $ expand' e
-         | otherwise = e
-    where
-        expandable (Add e1 e2) = expandable e1 || expandable e2
-        expandable (Sub e1 e2) = expandable e1 || expandable e2
-        expandable (Mul (Add e1 e2) e) = True
-        expandable (Mul e (Add e1 e2)) = True
-        expandable (Mul (Sub e1 e2) e) = True
-        expandable (Mul e (Sub e1 e2)) = True
-        expandable (Mul e1 e2) = expandable e1 || expandable e2
-        expandable (Div (Add e1 e2) e) = True
-        expandable (Div (Sub e1 e2) e) = True
-        expandable (Div e1 e2) = expandable e1 || expandable e2
-        expandable e = False
-
-        expand' (Add e1 e2) = Add (expand' e1) (expand' e2)
-        expand' (Sub e1 e2) = Sub (expand' e1) (expand' e2)
-        expand' (Mul (Add e1 e2) e) = Add (expand' $ Mul e1 e) (expand' $ Mul e2 e)
-        expand' (Mul e (Add e1 e2)) = Add (expand' $ Mul e e1) (expand' $ Mul e e2)
-        expand' (Mul (Sub e1 e2) e) = Sub (expand' $ Mul e1 e) (expand' $ Mul e2 e)
-        expand' (Mul e (Sub e1 e2)) = Sub (expand' $ Mul e e1) (expand' $ Mul e e2)
-        expand' (Mul e1 e2) = Mul (expand' e1) (expand' e2)
-        expand' (Div (Add e1 e2) e) = Add (expand' $ Div e1 e) (expand' $ Div e2 e)
-        expand' (Div (Sub e1 e2) e) = Sub (expand' $ Div e1 e) (expand' $ Div e2 e)
-        expand' (Div e1 e2) = Div (expand' e1) (expand' e2)
-        expand' e = e
+expand = travel worker
+  where
+    worker2 f = let g = first Any . worker
+                 in dimap (\(a,b)->(g a,g b)) (first getAny) (uncurry (liftA2 f))
+    worker (Add e1 e2) = worker2 Add (e1,e2)
+    worker (Mul e1 (Add e2 e3)) = (True, Add (Mul e1 e2) (Mul e1 e3))
+    worker (Mul (Add e1 e2) e3) = (True, Add (Mul e1 e3) (Mul e2 e3))
+    worker (Mul e1 e2) = worker2 Mul (e1,e2)
+    worker (Pow (Mul e1 e2) e3) = (True, Mul (Pow e1 e3) (Pow e2 e3))
+    worker (Pow e1 e2) = worker2 Pow (e1,e2)
+    worker e = (False, e)
 
 flatten :: Exp -> [(Double, Term)]
 flatten (Add e1 e2) = flatten e1 ++ flatten e2
-flatten (Sub e1 e2) = flatten e1 ++ flatten (expand $ Mul (Num (-1)) e2)
 flatten (Mul e1 e2) = merge (flatten e1) (flatten e2)
+flatten (Pow e1@(Add _ _) (Num n)) = [(1, M.singleton e1 n)]
+flatten (Pow (Pow e1 (Num m)) (Num n)) = flatten $ Pow e1 (Num $ n * m)
 flatten (Pow e1 (Num n)) = [(1, M.singleton e1 n)]
 flatten s@Sym{} = [(1, M.singleton s 1.0)]
 flatten (Num x) = [(x, M.empty)]
 flatten _ = []
 
 merge :: [(Double, Term)] -> [(Double, Term)] -> [(Double, Term)]
-merge e1 e2 = [foldr (\(a,t) (a',t') -> (a*a', M.unionWith (+) t t')) (1,M.empty) $ e1 ++ e2]
+merge e1 e2 = [foldr (\(a,t) (a',t')->(a*a', M.unionWith (+) t t')) (1,M.empty) $ e1++e2]
 
+-- 同じTermをまとめる
 eval :: [(Double,Term)] -> [(Double, Term)]
 eval = foldr (\xs acc -> eval' xs:acc) [] . groupBy (\x y -> snd x == snd y) . sortOn snd
     where eval' = (,) <$> sum . map fst <*> snd . head
 
-rebuild :: [(Double, Term)] -> Exp
-rebuild = foldl1' build . map fromJust . filter isJust . map toExp
-    where
-        build e1 (Neg e2) = Sub e1 e2
-        build e1 e2 = Add e1 e2
-        toExp (x,t) | x == 0 = Nothing
-                    | x == 1 = Just $ toExp' t
-                    | x == -1 = Just $ Neg $ toExp' t
-                    | x < -1 = Just $ Neg $ Mul (Num $ negate x) (toExp' t)
-                    | otherwise = Just $ Mul (Num x) (toExp' t)
-        toExp' = foldl1' Mul . foldr build' [] . M.toList
-        build' (e,i) acc | i == 1 = e:acc
-                         | i == 0 = acc
-                         | otherwise = Pow e (Num i):acc
+compose :: [(Double,Term)] -> Exp
+compose = foldr1 Add . map build
+  where
+    build (x,t) | x == 0 = Num 0
+                | M.null t = Num x
+                | x == 1 = buildTerm t
+                | otherwise = Mul (Num x) (buildTerm t)
+    buildTerm = foldr1 Mul . M.foldrWithKey worker []
+      where
+        worker e n acc | n == 0 = Num 1:acc
+                       | n == 1 = e:acc
+                       | otherwise = Pow e (Num n):acc
+
+buildup :: Exp -- [Add, Mul, Pow, Sym, Num]
+        -> Exp -- [Add, Sub, Mul, Div, Pow, Neg, Sym, Num]
+buildup = travel worker
+  where
+    worker2 f = let g = first Any . worker
+                 in dimap (\(a,b)->(g a,g b)) (first getAny) (uncurry (liftA2 f))
+    worker (Add (Num 0) e) = (True, e)
+    worker (Add e (Num 0)) = (True, e)
+    worker (Add e1 (Neg e2)) = (True, Sub e1 e2)
+    worker (Add e1 e2) = worker2 Add (e1,e2)
+    worker (Sub e1 (Neg e2)) = (True, Add e1 e2)
+    worker (Sub e1 e2) = worker2 Sub (e1,e2)
+    worker (Mul (Num 1) e) = (True, e)
+    worker (Mul e (Num 1)) = (True, e)
+    worker (Mul (Num 0) _) = (True, Num 0)
+    worker (Mul _ (Num 0)) = (True, Num 0)
+    worker (Mul (Neg e1) e2) = (True, Neg (Mul e1 e2))
+    worker (Mul e1 (Neg e2)) = (True, Neg (Mul e1 e2))
+    worker (Mul e1 e2) = worker2 Mul (e1,e2)
+    worker (Div (Neg e1) e2) = (True, Neg (Div e1 e2))
+    worker (Div e1 (Neg e2)) = (True, Neg (Div e1 e2))
+    worker (Div e1 e2) = worker2 Div (e1,e2)
+    worker (Pow (Num 1) _) = (True, Num 1)
+    worker (Pow _ (Num 0)) = (True, Num 1)
+    worker (Pow (Num 0) _) = (True, Num 0)
+    worker (Pow e1 e2) = worker2 Pow (e1,e2)
+    worker (Neg (Neg e)) = (True, e)
+    worker (Num n) | n < 0 = (True, Neg (Num $ negate n))
+    worker e = (False, e)
