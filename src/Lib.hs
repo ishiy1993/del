@@ -15,7 +15,7 @@ import qualified Data.Map as M
 import Syntax
 
 diffByT :: EOM -> EOM
-diffByT eom = map (\(Equation l r) -> Equation (d T l) (simplify $ replace $ d T r)) eom
+diffByT eom = map (\(Equation l r) -> Equation (d T l) (simplifyExp $ replace $ d T r)) eom
     where
         replace (Add e1 e2) = Add (replace e1) (replace e2)
         replace (Sub e1 e2) = Sub (replace e1) (replace e2)
@@ -35,7 +35,7 @@ find :: Exp -> EOM -> Exp
 find e = rhs . head . filter (\eq -> lhs eq == e)
 
 diffBy :: Coord -> EOM -> EOM
-diffBy i = map (\(Equation l r) -> Equation (d i l) (simplify $ d i r))
+diffBy i = map (\(Equation l r) -> Equation (d i l) (simplifyExp $ d i r))
 
 d :: Coord -> Exp -> Exp
 d i (Num _) = Num 0.0
@@ -51,8 +51,14 @@ d i (Pow e1 (Num n)) | n /= 0 = Mul (Mul (Num n) (Pow e1 (Num $ n -1))) (d i e1)
 d i (Pow e1 (Neg (Num n))) | n /= 0 = Mul (Mul (Neg (Num n)) (Pow e1 (Neg (Num $ n+1)))) (d i e1)
                            | otherwise = Num 0.0
 
-simplify :: Exp -> Exp
-simplify = buildup . compose . eval . flatten . expand . cleanup
+simplify :: EOM -> EOM
+simplify = map simplifyEquation
+
+simplifyEquation :: Equation -> Equation
+simplifyEquation (Equation l r) = Equation (simplifyExp l) (simplifyExp r)
+
+simplifyExp :: Exp -> Exp
+simplifyExp = buildup . compose . eval . flatten . expand . cleanup
 
 type Term = M.Map Exp Double
 

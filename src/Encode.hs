@@ -32,7 +32,7 @@ toCode eom' = unlines
   ]
   where
     dim = length axes
-    eom = map (\(Equation l r) -> Equation l (simplify r)) eom'
+    eom = simplify eom'
     axes = S.toList $ S.delete T $ maximumBy (comparing S.size) $ map (dependOn . lhs) eom
 
 encodeDiff :: Coords -> String
