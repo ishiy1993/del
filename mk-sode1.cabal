@@ -16,7 +16,6 @@ cabal-version:       >=1.10
 library
   hs-source-dirs:      src
   exposed-modules:     Lib
-                     , Encode
                      , Format
                      , Parser
                      , Syntax
@@ -41,7 +40,7 @@ test-suite spec
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
   main-is:             Spec.hs
-  other-modules:       EncodeSpec
+  other-modules:       FormatSpec
                      , LibSpec
                      , ParserSpec
   build-depends:       base

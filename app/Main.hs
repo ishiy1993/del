@@ -4,7 +4,6 @@ import Control.Monad
 import System.Environment
 import System.Exit
 
-import Encode
 import Format
 import Parser
 

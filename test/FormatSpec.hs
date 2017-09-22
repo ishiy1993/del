@@ -1,8 +1,8 @@
-module EncodeSpec where
+module FormatSpec where
 
 import Test.Hspec
 
-import Encode
+import Format
 import Syntax
 
 main :: IO ()
