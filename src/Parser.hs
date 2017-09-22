@@ -6,27 +6,25 @@ import qualified Data.Set as S
 import qualified Data.MultiSet as MS
 import Data.Typeable
 import Text.Trifecta
-import Text.Parser.Expression
-import Text.Parser.Token.Style
 
 import Syntax
 
-parseEOM :: Parser EOM
-parseEOM = many parseEquation
+eomParser :: Parser EOM
+eomParser = many equationParser
 
-parseEquation :: Parser Equation
-parseEquation = do
+equationParser :: Parser Equation
+equationParser = do
     spaces
-    l <- parseSym
+    l <- symParser
     spaces
     char '='
     spaces
-    r <- parseExp
+    r <- expParser
     spaces
     return $ Equation l r
 
-parseExp :: Parser Exp
-parseExp = expr
+expParser :: Parser Exp
+expParser = expr
 
 -- この実装は正しくない
 -- `*`, `/` よりも `**` のほうが結合性が高くなっているが
@@ -43,17 +41,17 @@ infixOp op f = f <$ symbol op
 factor :: Parser Exp
 factor = parens expr
      <|> neg
-     <|> parseSym
-     <|> parseNum
+     <|> symParser
+     <|> numParser
 
 neg :: Parser Exp
 neg = symbol "-" >> Neg <$> factor
 
-parseNum :: Parser Exp
-parseNum = Num . either fromIntegral id <$> integerOrDouble
+numParser :: Parser Exp
+numParser = Num . either fromIntegral id <$> integerOrDouble
 
-parseSym :: Parser Exp
-parseSym = do
+symParser :: Parser Exp
+symParser = do
     n <- some letter
     as <- option S.empty $ brackets args
     ds <- option MS.empty $ MS.fromList <$> (char '_' *> some coord)
@@ -68,13 +66,15 @@ coord = (char 't' *> pure T)
     <|> (char 'y' *> pure Y)
     <|> (char 'z' *> pure Z)
 
+parseEOM :: String -> Result EOM
+parseEOM = parseString eomParser mempty . filter (/=' ')
+
 getEOMFromFile :: String -> IO EOM
 getEOMFromFile fn = do
-    str <- readFile fn
-    let str' = filter (/=' ') str
-    case parseString parseEOM mempty str' of
-         Success eom -> return eom
-         Failure err -> throwIO $ ParseException err
+  str <- readFile fn
+  case parseEOM str of
+    Success eom -> return eom
+    Failure err -> throwIO $ ParseException err
 
 data ParseException = ParseException ErrInfo
     deriving Typeable
