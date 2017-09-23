@@ -66,15 +66,17 @@ coord = (char 't' *> pure T)
     <|> (char 'y' *> pure Y)
     <|> (char 'z' *> pure Z)
 
-parseEOM :: String -> Result EOM
-parseEOM = parseString eomParser mempty . filter (/=' ')
+parseEOM :: String -> Either ErrInfo EOM
+parseEOM str = case parseString eomParser mempty $ filter (/=' ') str of
+                 Success eom -> Right eom
+                 Failure err -> Left err
 
 getEOMFromFile :: String -> IO EOM
 getEOMFromFile fn = do
   str <- readFile fn
   case parseEOM str of
-    Success eom -> return eom
-    Failure err -> throwIO $ ParseException err
+    Right eom -> return eom
+    Left err -> throwIO $ ParseException err
 
 data ParseException = ParseException ErrInfo
     deriving Typeable
