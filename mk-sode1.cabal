@@ -42,6 +42,15 @@ executable mk-sode1
                      , mk-sode1
   default-language:    Haskell2010
 
+executable del
+  hs-source-dirs:      app
+  main-is:             Del.hs
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  build-depends:       base
+                     , mk-sode1
+                     , optparse-applicative
+  default-language:    Haskell2010
+
 test-suite spec
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
