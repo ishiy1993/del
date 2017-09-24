@@ -14,7 +14,7 @@ main = do
   unless (valid opts) $ die "invalid options"
   let (cs,fn,lang) = fromOpts opts
   eom <- readEOM fn
-  let eom' = simplify $ appEndo (foldMap (Endo . diffBy) cs) eom
+  let eom' = appEndo (foldMap (Endo . diffBy) cs) $ simplify eom
   putStr $ encode lang eom'
 
 data Opts = Opts
