@@ -1,4 +1,4 @@
-FROM haskell as builder
+FROM ishiy1993/haskell-stack as builder
 
 COPY . /work
 WORKDIR /work
