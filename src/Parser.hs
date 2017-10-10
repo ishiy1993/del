@@ -52,7 +52,7 @@ numParser = Num . either fromIntegral id <$> integerOrDouble
 
 symParser :: Parser Exp
 symParser = do
-    n <- some letter
+    n <- (:) <$> letter <*> many alphaNum
     as <- option S.empty $ brackets args
     ds <- option MS.empty $ MS.fromList <$> (char '_' *> some coord)
     return $ Sym n as ds
