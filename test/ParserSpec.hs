@@ -12,6 +12,11 @@ check parser input = parseString parser mempty input ^?! _Success
 
 spec :: Spec
 spec = do
+  describe "symParser" $ do
+    it "check a" $
+      check symParser "a" `shouldBe` (Sym "a" mempty mempty)
+    it "check a1" $
+      check symParser "a1" `shouldBe` (Sym "a1" mempty mempty)
   describe "expParser" $ do
     let a = Sym "a" mempty mempty
         b = Sym "b" mempty mempty
