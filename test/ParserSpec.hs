@@ -7,41 +7,36 @@ import Text.Trifecta
 import Parser
 import Syntax
 
+check :: Parser a -> String -> a
+check parser input = parseString parser mempty input ^?! _Success
+
 spec :: Spec
-spec = describe "expParser" $ do
+spec = do
+  describe "expParser" $ do
+    let a = Sym "a" mempty mempty
+        b = Sym "b" mempty mempty
+        c = Sym "c" mempty mempty
     it "checks a+b" $
-        parseString expParser mempty "a+b" ^?! _Success
-            `shouldBe` Add (Sym "a" mempty mempty) (Sym "b" mempty mempty)
+      check expParser "a+b" `shouldBe` Add a b
     it "checks a-b" $
-        parseString expParser mempty "a-b" ^?! _Success
-            `shouldBe` Sub (Sym "a" mempty mempty) (Sym "b" mempty mempty)
+      check expParser "a-b" `shouldBe` Sub a b
     it "checks a*b" $
-        parseString expParser mempty "a*b" ^?! _Success
-            `shouldBe` Mul (Sym "a" mempty mempty) (Sym "b" mempty mempty)
+      check expParser "a*b" `shouldBe` Mul a b
     it "checks a/b" $
-        parseString expParser mempty "a/b" ^?! _Success
-            `shouldBe` Div (Sym "a" mempty mempty) (Sym "b" mempty mempty)
+      check expParser "a/b" `shouldBe` Div a b
     it "checks a**b" $
-        parseString expParser mempty "a**b" ^?! _Success
-            `shouldBe` Pow (Sym "a" mempty mempty) (Sym "b" mempty mempty)
+      check expParser "a**b" `shouldBe` Pow a b
     it "checks a*b+c" $
-        parseString expParser mempty "a*b+c" ^?! _Success
-            `shouldBe` Add (Mul (Sym "a" mempty mempty) (Sym "b" mempty mempty)) (Sym "c" mempty mempty)
+      check expParser "a*b+c" `shouldBe` Add (Mul a b) c
     it "checks a/b-c" $
-        parseString expParser mempty "a/b-c" ^?! _Success
-            `shouldBe` Sub (Div (Sym "a" mempty mempty) (Sym "b" mempty mempty)) (Sym "c" mempty mempty)
+      check expParser "a/b-c" `shouldBe` Sub (Div a b) c
     it "checks a*b**c" $
-        parseString expParser mempty "a*b**c" ^?! _Success
-            `shouldBe` Mul (Sym "a" mempty mempty) (Pow (Sym "b" mempty mempty) (Sym "c" mempty mempty))
+      check expParser "a*b**c" `shouldBe` Mul a (Pow b c)
     it "checks a**b*c" $
-        parseString expParser mempty "a**b*c" ^?! _Success
-            `shouldBe` Mul (Pow (Sym "a" mempty mempty) (Sym "b" mempty mempty)) (Sym "c" mempty mempty)
+      check expParser "a**b*c" `shouldBe` Mul (Pow a b) c
     it "checks -a+b" $
-        parseString expParser mempty "-a+b" ^?! _Success
-            `shouldBe` Add (Neg (Sym "a" mempty mempty)) (Sym "b" mempty mempty)
+      check expParser "-a+b" `shouldBe` Add (Neg a) b
     it "checks -a*b" $
-        parseString expParser mempty "-a*b" ^?! _Success
-            `shouldBe` Mul (Neg (Sym "a" mempty mempty)) (Sym "b" mempty mempty)
+      check expParser "-a*b" `shouldBe` Mul (Neg a) b
     it "checks -(a**b)" $
-        parseString expParser mempty "-(a**b)" ^?! _Success
-            `shouldBe` Neg (Pow (Sym "a" mempty mempty) (Sym "b" mempty mempty))
+      check expParser "-(a**b)" `shouldBe` Neg (Pow a b)
