@@ -3,7 +3,7 @@ FROM ishiy1993/haskell-stack as builder
 COPY . /work
 WORKDIR /work
 
-RUN stack setup && stack install --local-bin-path .
+RUN stack upgrade && stack setup && stack install --local-bin-path .
 
 FROM ishiy1993/formura-bin
 
