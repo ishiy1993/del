@@ -49,6 +49,7 @@ executable del
   build-depends:       base
                      , mk-sode1
                      , optparse-applicative
+                     , unordered-containers
   default-language:    Haskell2010
 
 test-suite spec
