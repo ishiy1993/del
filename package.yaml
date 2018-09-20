@@ -1,0 +1,68 @@
+name: del
+version: '0.1.0.0'
+category: Math
+author: ishiy
+maintainer: y.ishihara.1993@gmail.com
+copyright: 2017 ishiy
+license: BSD3
+github: ishiy1993/del
+extra-source-files:
+- README.md
+library:
+  source-dirs: src
+  exposed-modules:
+  - Lib
+  - Encode
+  - Encode.Cpp
+  - Encode.Fmr
+  - Encode.Tex
+  - Encode.Txt
+  - Encode.Utils
+  - Format
+  - Parser
+  - Syntax
+  dependencies:
+  - base >=4.7 && <5
+  - multiset
+  - containers
+  - hashable
+  - parsers
+  - profunctors
+  - trifecta
+executables:
+  mk-sode1:
+    main: Main.hs
+    source-dirs: app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - base
+    - del
+  del:
+    main: Del.hs
+    source-dirs: app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - base
+    - del
+    - optparse-applicative
+    - unordered-containers
+tests:
+  spec:
+    main: Spec.hs
+    source-dirs: test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - base
+    - mk-sode1
+    - hspec
+    - lens
+    - trifecta
