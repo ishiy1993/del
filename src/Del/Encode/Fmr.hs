@@ -1,15 +1,15 @@
-module Encode.Txt where
+module Del.Encode.Fmr where
 
 import Data.Ratio (numerator, denominator)
 
-import Encode.Utils
-import Syntax
+import Del.Encode.Utils
+import Del.Syntax
 
 encodeExp :: Exp -> String
 encodeExp (Num x) = case (,) <$> numerator <*> denominator $ toRational x of
                       (n,1) -> show n
                       (n,d) -> show n ++ "/" ++ show d
-encodeExp (Sym n as ds) = n ++ encodeArgs as ++ encodeDiff ds
+encodeExp (Sym n _ ds) = n ++ encodeDiff ds
 encodeExp (Neg e) = "-" ++ encodeExp e
 encodeExp (Mul e1 e2) = encodeExp e1 ++ "*" ++ encodeExp e2
 encodeExp (Div e1 e2) = encodeExp e1 ++ "/" ++ encodeExp e2

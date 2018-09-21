@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE TypeFamilies #-}
-module Format where
+module Del.Format where
 
 import Data.Ord (comparing)
 import Data.List (intercalate, maximumBy, sortBy, unfoldr)
@@ -9,8 +9,8 @@ import qualified Data.Set as S
 import qualified Data.MultiSet as MS
 import Text.Printf
 
-import Lib
-import Syntax
+import Del.Lib
+import Del.Syntax
 
 toCode :: EOM -> String
 toCode eom' = unlines

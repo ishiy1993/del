@@ -2,8 +2,8 @@ module LibSpec where
 
 import Test.Hspec
 
-import Lib
-import Syntax
+import Del.Lib
+import Del.Syntax
 
 main :: IO ()
 main = hspec spec

@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE TypeSynonymInstances #-}
-module Syntax where
+module Del.Syntax where
 
 import Data.Hashable (Hashable(..))
 import qualified Data.Set as S

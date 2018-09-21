@@ -1,10 +1,10 @@
-module Encode where
+module Del.Encode where
 
-import qualified Encode.Cpp as Cpp
-import qualified Encode.Fmr as Fmr
-import qualified Encode.Tex as Tex
-import qualified Encode.Txt as Txt
-import Syntax
+import qualified Del.Encode.Cpp as Cpp
+import qualified Del.Encode.Fmr as Fmr
+import qualified Del.Encode.Tex as Tex
+import qualified Del.Encode.Txt as Txt
+import Del.Syntax
 
 data Lang = Txt
           | Fmr

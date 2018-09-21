@@ -1,10 +1,10 @@
-module Encode.Utils where
+module Del.Encode.Utils where
 
 import Data.List (intercalate)
 import qualified Data.Set as S
 import qualified Data.MultiSet as MS
 
-import Syntax
+import Del.Syntax
 
 encodeDiff :: Coords -> String
 encodeDiff cs | MS.null cs = ""

@@ -4,8 +4,8 @@ import Control.Lens
 import Test.Hspec
 import Text.Trifecta
 
-import Parser
-import Syntax
+import Del.Parser
+import Del.Syntax
 
 check :: Parser a -> String -> a
 check parser input = parseString parser mempty input ^?! _Success

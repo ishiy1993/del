@@ -2,8 +2,8 @@ module FormatSpec where
 
 import Test.Hspec
 
-import Format
-import Syntax
+import Del.Format
+import Del.Syntax
 
 main :: IO ()
 main = hspec spec

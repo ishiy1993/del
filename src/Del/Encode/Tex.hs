@@ -1,9 +1,9 @@
-module Encode.Tex where
+module Del.Encode.Tex where
 
 import Data.Ratio (numerator, denominator)
 
-import Encode.Utils
-import Syntax
+import Del.Encode.Utils
+import Del.Syntax
 
 encodeExp :: Exp -> String
 encodeExp (Num x) = case (,) <$> numerator <*> denominator $ toRational x of

@@ -10,17 +10,6 @@ extra-source-files:
 - README.md
 library:
   source-dirs: src
-  exposed-modules:
-  - Lib
-  - Encode
-  - Encode.Cpp
-  - Encode.Fmr
-  - Encode.Tex
-  - Encode.Txt
-  - Encode.Utils
-  - Format
-  - Parser
-  - Syntax
   dependencies:
   - base >=4.7 && <5
   - multiset
@@ -30,16 +19,6 @@ library:
   - profunctors
   - trifecta
 executables:
-  mk-sode1:
-    main: Main.hs
-    source-dirs: app
-    ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
-    dependencies:
-    - base
-    - del
   del:
     main: Del.hs
     source-dirs: app
@@ -62,7 +41,7 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - base
-    - mk-sode1
+    - del
     - hspec
     - lens
     - trifecta

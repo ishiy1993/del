@@ -1,4 +1,4 @@
-module Parser where
+module Del.Parser where
 
 import Control.Applicative
 import Control.Exception
@@ -7,7 +7,7 @@ import qualified Data.MultiSet as MS
 import Data.Typeable
 import Text.Trifecta
 
-import Syntax
+import Del.Syntax
 
 eomParser :: Parser EOM
 eomParser = many equationParser

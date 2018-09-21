@@ -1,7 +1,7 @@
-module Encode.Cpp where
+module Del.Encode.Cpp where
 
-import Encode.Utils
-import Syntax
+import Del.Encode.Utils
+import Del.Syntax
 
 encodeExp :: Exp -> String
 encodeExp (Num x) = show x

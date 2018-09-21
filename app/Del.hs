@@ -5,10 +5,10 @@ import Data.Monoid
 import Options.Applicative
 import System.Exit (die)
 
-import Encode
-import Lib
-import Parser (parseEOM)
-import Syntax
+import Del.Encode
+import Del.Lib
+import Del.Parser (parseEOM)
+import Del.Syntax
 
 main :: IO ()
 main = do

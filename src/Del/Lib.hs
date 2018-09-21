@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE TypeSynonymInstances #-}
-module Lib where
+module Del.Lib where
 
 import Control.Arrow (first)
 import Control.Applicative (liftA2)
@@ -12,7 +12,7 @@ import qualified Data.Set as S
 import qualified Data.MultiSet as MS
 import qualified Data.Map as M
 
-import Syntax
+import Del.Syntax
 
 diffByT :: EOM -> EOM
 diffByT eom = map (\(Equation l r) -> Equation (d T l) (simplifyExp $ replace $ d T r)) eom
