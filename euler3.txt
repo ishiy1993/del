@@ -1,5 +1,0 @@
-b[t,x,y,z]_t = b[t,x,y,z]*(u[t,x,y,z]_x + v[t,x,y,z]_y + w[t,x,y,z]_z) - (b[t,x,y,z]_x*u[t,x,y,z] + b[t,x,y,z]_y*v[t,x,y,z] + b[t,x,y,z]_z*w[t,x,y,z])
-u[t,x,y,z]_t = -(u[t,x,y,z]*u[t,x,y,z]_x + v[t,x,y,z]*u[t,x,y,z]_y + w[t,x,y,z]*u[t,x,y,z]_z + b[t,x,y,z]*p[t,x,y,z]_x)
-v[t,x,y,z]_t = -(u[t,x,y,z]*v[t,x,y,z]_x + v[t,x,y,z]*v[t,x,y,z]_y + w[t,x,y,z]*v[t,x,y,z]_z + b[t,x,y,z]*p[t,x,y,z]_y)
-w[t,x,y,z]_t = -(u[t,x,y,z]*w[t,x,y,z]_x + v[t,x,y,z]*w[t,x,y,z]_y + w[t,x,y,z]*w[t,x,y,z]_z + b[t,x,y,z]*p[t,x,y,z]_z)
-p[t,x,y,z]_t = -(gm*p[t,x,y,z]*(u[t,x,y,z]_x + v[t,x,y,z]_y + w[t,x,y,z]_z) + u[t,x,y,z]*p[t,x,y,z]_x + v[t,x,y,z]*p[t,x,y,z]_y + w[t,x,y,z]*p[t,x,y,z]_z)
